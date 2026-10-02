@@ -19,7 +19,8 @@ Everything lives behind the toolbar added to YouTube Music's top bar. Press `Ctr
 2. Open it. YouputDesk installs in a few seconds (no admin rights needed) and starts.
 
 Windows may show **"Windows protected your PC"** because the installer isn't code-signed yet. Click
-**More info → Run anyway**.
+**More info → Run anyway**. Releases will be signed through the SignPath Foundation once the project's
+application is approved; see the [code signing policy](#code-signing-policy).
 
 It runs on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs, and it updates itself. To uninstall,
 go to Windows Settings → Apps; uninstalling also removes all of its data.
