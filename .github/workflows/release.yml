@@ -25,6 +25,13 @@ jobs:
       - name: Tag matches package.json version
         shell: bash
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      # The installer and portable targets publish in parallel; if neither finds a draft, each creates
+      # its own and the files end up split across two releases. Create the one draft up front.
+      - name: Create draft release
+        shell: bash
+        run: gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "${GITHUB_REF_NAME#v}" --notes ""
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
