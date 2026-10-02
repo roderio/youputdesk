@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouputDesk: YouTube Music desktop app for Windows</title>
+  <meta name="description" content="A free, open-source desktop app for YouTube Music on Windows. Adds a 10-band equalizer, synced lyrics, themes, a tray mini player, global hotkeys and Discord status. Premium works.">
+  <link rel="canonical" href="https://roderio.github.io/youputdesk/">
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#170f20">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="YouputDesk: YouTube Music desktop app for Windows">
+  <meta property="og:description" content="Equalizer, synced lyrics, themes, a tray mini player and global hotkeys for YouTube Music. Free and open source.">
+  <meta property="og:url" content="https://roderio.github.io/youputdesk/">
+  <meta property="og:image" content="https://roderio.github.io/youputdesk/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preload" href="fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "YouputDesk",
+    "description": "Desktop app for YouTube Music on Windows with an equalizer, synced lyrics, themes, a tray mini player and global hotkeys.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Windows 10, Windows 11",
+    "url": "https://roderio.github.io/youputdesk/",
+    "downloadUrl": "https://github.com/roderio/youputdesk/releases/latest",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./"><img src="icon.png" alt="" width="28" height="28"> YouputDesk</a>
+    <nav>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/roderio/youputdesk">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <h1>YouTube Music, with the controls you wished it had.</h1>
+        <p class="lede">A free Windows app that runs the real YouTube Music and adds an equalizer, synced lyrics,
+          themes, a tray mini player and global hotkeys. Your account and Premium work as usual.</p>
+        <div class="cta">
+          <a class="button" id="download" href="https://github.com/roderio/youputdesk/releases/latest">Download for Windows</a>
+          <p class="meta" id="download-meta">For Windows 10 and 11, on x64 and ARM. Free and open source.</p>
+        </div>
+      </div>
+
+      <figure class="eq" aria-label="A 10-band equalizer. Drag the bars to try it.">
+        <div class="eq-bars" id="eq"></div>
+        <figcaption>
+          <span id="eq-preset">Bass boost</span>
+          <span class="eq-hint">Drag the bars. The app has the same 10 bands, plus a limiter so boosts never distort.</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="demo">
+      <img src="screenshots/main.png" width="1600" height="1000" alt="YouputDesk showing YouTube Music with its toolbar and a song playing" loading="lazy">
+    </section>
+
+    <section class="features" aria-label="Features">
+      <article class="feature">
+        <div>
+          <h2>Tune the sound</h2>
+          <p>Ten bands, presets, bass boost and loudness normalization, so quiet and loud tracks sit at the same level.
+            A limiter at the end of the chain keeps boosts clean.</p>
+        </div>
+        <img src="screenshots/equalizer.png" alt="Equalizer panel with ten bands and presets" loading="lazy">
+      </article>
+      <article class="feature">
+        <div>
+          <h2>Sing along</h2>
+          <p>Lyrics scroll in time with the song. Click any line to jump there, or go full screen.
+            Lyrics come from LRCLIB, and only once you allow it.</p>
+        </div>
+        <img src="screenshots/lyrics.png" alt="Synced lyrics highlighted line by line" loading="lazy">
+      </article>
+      <article class="feature">
+        <div>
+          <h2>Make it yours</h2>
+          <p>Pick a built-in palette, let the Album Art theme follow the cover, or build your own in the theme
+            editor and share it as a file.</p>
+        </div>
+        <img src="screenshots/themes.png" alt="Theme picker with several palettes" loading="lazy">
+      </article>
+      <article class="feature">
+        <div>
+          <h2>Keep it playing</h2>
+          <p>Close the window and the music carries on in the tray. A small always-on-top player sits wherever you
+            drag it, and media keys, taskbar buttons and global hotkeys work from any app.</p>
+        </div>
+        <img src="screenshots/mini-player.png" alt="Mini player floating over the desktop" loading="lazy">
+      </article>
+      <ul class="extras">
+        <li><strong>Ad alerts.</strong> A heads-up when an ad starts, and one-key skip when YouTube allows it.</li>
+        <li><strong>Discord status.</strong> Show friends what you're listening to.</li>
+        <li><strong>Private by default.</strong> No accounts, no analytics. Nothing leaves your PC until you say so.</li>
+      </ul>
+    </section>
+
+    <section class="install" id="install">
+      <h2>Install</h2>
+      <div class="tabs" role="tablist" aria-label="Ways to install">
+        <button role="tab" id="tab-installer" aria-controls="panel-installer" aria-selected="true">Installer</button>
+        <button role="tab" id="tab-winget" aria-controls="panel-winget" aria-selected="false" tabindex="-1">winget</button>
+        <button role="tab" id="tab-scoop" aria-controls="panel-scoop" aria-selected="false" tabindex="-1">Scoop</button>
+        <button role="tab" id="tab-portable" aria-controls="panel-portable" aria-selected="false" tabindex="-1">Portable</button>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-installer" aria-labelledby="tab-installer">
+        <p>Download <a id="setup-link" href="https://github.com/roderio/youputdesk/releases/latest">the installer</a> and open it.
+          It installs in a few seconds without admin rights and keeps itself up to date.</p>
+        <p class="note">Windows may say "Windows protected your PC" because the installer isn't code-signed yet.
+          Click <b>More info</b>, then <b>Run anyway</b>.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-winget" aria-labelledby="tab-winget" hidden>
+        <p>In PowerShell or Terminal:</p>
+        <pre><code>winget install roderio.YouputDesk</code><button class="copy" type="button">Copy</button></pre>
+        <p class="note">Update later with <code>winget upgrade roderio.YouputDesk</code>, or let the app update itself.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-scoop" aria-labelledby="tab-scoop" hidden>
+        <p>In PowerShell:</p>
+        <pre><code>scoop bucket add roderio https://github.com/roderio/scoop-bucket
+scoop install youputdesk</code><button class="copy" type="button">Copy</button></pre>
+        <p class="note">Your sign-in and settings are kept across <code>scoop update</code>.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-portable" aria-labelledby="tab-portable" hidden>
+        <p>Download <a id="portable-link" href="https://github.com/roderio/youputdesk/releases/latest">the portable exe</a> and run it
+          from anywhere, even a USB stick. It keeps its data in a <code>YouputDesk-data</code> folder beside it and doesn't update itself.</p>
+      </div>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2>Questions</h2>
+      <details>
+        <summary>Is it safe? Windows warned me about it.</summary>
+        <p>The installer isn't code-signed yet, so SmartScreen doesn't recognize it. Every release is built by GitHub Actions
+          from the <a href="https://github.com/roderio/youputdesk">public source code</a>, and signing through the SignPath
+          Foundation is on the way. Installing with winget or Scoop skips the warning.</p>
+      </details>
+      <details>
+        <summary>Does YouTube Music Premium work?</summary>
+        <p>Yes. YouputDesk shows the real music.youtube.com, so you sign in with your Google account just like in a browser.</p>
+      </details>
+      <details>
+        <summary>Does it block ads?</summary>
+        <p>No. It tells you when an ad starts and lets you skip it with one key whenever YouTube shows a Skip button.</p>
+      </details>
+      <details>
+        <summary>What does it send, and to whom?</summary>
+        <p>Nothing until you choose. On first launch it asks about each optional feature that talks to another service:
+          Discord status, online lyrics and update checks. The <a href="https://github.com/roderio/youputdesk/blob/main/PRIVACY.md">privacy policy</a>
+          lists exactly what goes where.</p>
+      </details>
+      <details>
+        <summary>Something stopped working.</summary>
+        <p>YouTube Music changes its page now and then. <a href="https://github.com/roderio/youputdesk/issues/new/choose">Report it</a>
+          and the fix reaches you through the automatic updater.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p class="links"><a href="https://github.com/roderio/youputdesk">Source on GitHub</a>
+      <a href="https://github.com/roderio/youputdesk/blob/main/PRIVACY.md">Privacy</a>
+      <a href="https://github.com/roderio/youputdesk/blob/main/LICENSE">MIT license</a></p>
+    <p class="fine">YouputDesk is an independent project, not affiliated with or endorsed by Google or YouTube.
+      YouTube and YouTube Music are trademarks of Google LLC.</p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Categories for GitHub's "Generate release notes" button on draft releases, grouped by PR label.
+changelog:
+  exclude:
+    labels: [ignore-for-release]
+    authors: [dependabot]
+  categories:
+    - title: New features
+      labels: [enhancement]
+    - title: Fixes
+      labels: [bug, selectors]
+    - title: Accessibility
+      labels: [accessibility]
+    - title: Themes
+      labels: [theme]
+    - title: Other changes
+      labels: ['*']

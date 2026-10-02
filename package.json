@@ -14,7 +14,8 @@
     "test": "vitest run",
     "icons": "node scripts/gen-icons.mjs",
     "dist": "npm run typecheck && npm test && electron-vite build && electron-builder --win",
-    "release": "npm run typecheck && npm test && electron-vite build && electron-builder --win --publish always"
+    "release": "npm run typecheck && npm test && electron-vite build && electron-builder --win --publish always",
+    "social": "node scripts/social-preview.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",

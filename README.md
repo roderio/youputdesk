@@ -1,34 +1,91 @@
+<div align="center">
+
+<img src="resources/icon.png" width="96" alt="YouputDesk logo">
+
 # YouputDesk
 
-A Windows desktop app for YouTube Music. It runs the real music.youtube.com (so Google sign-in
-and Premium just work) and adds:
+**A desktop app for YouTube Music on Windows**, with an equalizer, synced lyrics, themes, a mini player and global hotkeys.
 
-- **Equalizer**: 10 bands, presets, bass boost, loudness normalization and a limiter so boosts never distort
-- **Synced lyrics**: from [LRCLIB](https://lrclib.net), with click-to-seek and a full-screen mode
-- **Themes**: built-in palettes, an "Album Art" theme that follows the cover, a theme editor, import/export
-- **Shortcuts**: in-app and global hotkeys, all rebindable, with conflict warnings
+[![Latest release](https://img.shields.io/github/v/release/roderio/youputdesk?label=release)](https://github.com/roderio/youputdesk/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/roderio/youputdesk/total)](https://github.com/roderio/youputdesk/releases)
+[![winget](https://img.shields.io/winget/v/roderio.YouputDesk?label=winget)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/r/roderio/YouputDesk)
+[![CI](https://github.com/roderio/youputdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/roderio/youputdesk/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/roderio/youputdesk)](LICENSE)
+
+### [⬇ Download for Windows](https://github.com/roderio/youputdesk/releases/latest) · [Website](https://roderio.github.io/youputdesk/)
+
+<img src="docs/screenshots/demo.gif" width="800" alt="YouputDesk: equalizer, synced lyrics and the mini player">
+
+</div>
+
+YouputDesk runs the real music.youtube.com, so Google sign-in, your library and Premium all work as usual.
+It then adds what the browser tab can't do:
+
+| | |
+| --- | --- |
+| **Equalizer**: 10 bands, presets, bass boost, loudness normalization and a limiter so boosts never distort | <img src="docs/screenshots/equalizer.png" width="400" alt="Equalizer panel"> |
+| **Synced lyrics**: line by line from [LRCLIB](https://lrclib.net), click a line to jump there, full-screen mode | <img src="docs/screenshots/lyrics.png" width="400" alt="Synced lyrics"> |
+| **Themes**: built-in palettes, an "Album Art" theme that follows the cover, a theme editor, import/export | <img src="docs/screenshots/themes.png" width="400" alt="Theme picker"> |
+| **Tray and mini player**: keeps playing when closed; a small always-on-top player you can drag anywhere | <img src="docs/screenshots/mini-player.png" width="400" alt="Mini player"> |
+
+Plus:
+
+- **Shortcuts**: in-app and global hotkeys, all rebindable, with conflict warnings (`Ctrl+/` lists them)
 - **Ad alerts**: a banner and Windows notification when an ad plays, with one-key skip when YouTube allows it
-- **Windows integration**: tray icon (click to open, right-click for controls and mini player), taskbar buttons and progress, media keys / media overlay
+- **Windows integration**: taskbar play/pause buttons and progress, media keys and the Windows media overlay
 - **Discord**: "Listening to…" status
-
-Everything lives behind the toolbar added to YouTube Music's top bar. Press `Ctrl+/` for all shortcuts.
+- **Private by default**: no accounts, no analytics, and nothing leaves your PC until you allow it
 
 ## Install
 
-1. Download **`YouputDesk-Setup-<version>.exe`** from the [latest release](https://github.com/roderio/youputdesk/releases/latest).
-2. Open it. YouputDesk installs in a few seconds (no admin rights needed) and starts.
+Pick whichever you like. All of them work on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs.
 
-Windows may show **"Windows protected your PC"** because the installer isn't code-signed yet. Click
-**More info → Run anyway**. Releases will be signed through the SignPath Foundation once the project's
-application is approved; see the [code signing policy](#code-signing-policy).
+**Installer** (recommended): download **`YouputDesk-Setup-<version>.exe`** from the
+[latest release](https://github.com/roderio/youputdesk/releases/latest) and open it. It installs in a few
+seconds without admin rights and updates itself.
 
-It runs on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs, and it updates itself. To uninstall,
-go to Windows Settings → Apps; uninstalling also removes all of its data.
+**winget:**
 
-**Portable:** prefer not to install? Download `YouputDesk-<version>-portable.exe`, or the smaller
-`-x64` / `-arm64` one for your PC, and run it from anywhere, even a USB stick. It keeps its data in a
-`YouputDesk-data` folder beside the exe and doesn't auto-update. Your Google sign-in is encrypted for
-your Windows account, so on another PC you'll be asked to sign in again.
+```powershell
+winget install roderio.YouputDesk
+```
+
+**Scoop:**
+
+```powershell
+scoop bucket add roderio https://github.com/roderio/scoop-bucket
+scoop install youputdesk
+```
+
+**Portable:** download `YouputDesk-<version>-portable.exe` (or the smaller `-x64` / `-arm64` one for your PC)
+and run it from anywhere, even a USB stick. It keeps its data in a `YouputDesk-data` folder beside the exe and
+doesn't update itself. Your Google sign-in is encrypted for your Windows account, so on another PC you'll be
+asked to sign in again.
+
+To uninstall, go to Windows Settings → Apps (or `winget uninstall` / `scoop uninstall`). Uninstalling also
+removes all of YouputDesk's data.
+
+## FAQ
+
+**Windows says "Windows protected your PC". Is it safe?**
+The installer isn't code-signed yet, so SmartScreen doesn't recognize it. Click **More info → Run anyway**.
+Releases are built only by GitHub Actions from this public source code, and they'll be signed through the
+SignPath Foundation once the project's application is approved (see the
+[code signing policy](#code-signing-policy)). Installing with winget or Scoop skips this dialog.
+
+**Does YouTube Music Premium work?**
+Yes. It's the real YouTube Music website, so signing in with your Google account works as it does in a browser.
+
+**Why not just use the browser or the installable web app?**
+They can't add an equalizer, synced lyrics, global hotkeys, a tray mini player, ad alerts or Discord status.
+YouputDesk adds them without changing anything about your account.
+
+**Does it block ads?**
+No. It tells you when an ad starts and lets you skip with one key when YouTube shows a Skip button.
+
+**Something broke after YouTube Music changed. What now?**
+[Open an issue](https://github.com/roderio/youputdesk/issues/new/choose). YouTube Music changes its page
+from time to time, and fixes reach installed copies through the automatic updater.
 
 ## Privacy & security
 
@@ -37,49 +94,14 @@ may talk to other services (Discord status, online lyrics, update checks), and n
 choose. See [PRIVACY.md](PRIVACY.md) for exactly what goes where, and [SECURITY.md](SECURITY.md) for how the
 app is hardened and how to report a vulnerability.
 
-## Development
-
-```sh
-npm install
-npm run dev        # run with hot reload
-npm test           # unit tests
-npm run typecheck
-npm run dist       # typecheck + test + build the installer and portable exes into dist/
-npm run icons      # regenerate icons in resources/ and build/icon.ico
-```
-
-`YOUPUTDESK_PROFILE=test npm run dev` runs a separate profile (its own login, settings and
-single-instance lock), so you can test without touching your everyday setup.
-
-## Where things are
-
-| Area | Code |
-| --- | --- |
-| Google sign-in, browser identity | `src/main/auth.ts`, `src/main/ua.ts` |
-| Tray, mini player, taskbar, global shortcuts, toasts, Discord, lyrics | `src/main/*.ts` |
-| Audio engine (Web Audio chain) | `src/preload/audio.ts` |
-| Overlay UI (toolbar, panels, modals) | `src/preload/overlay/` |
-| YouTube Music DOM selectors | `src/shared/selectors.ts` (first place to look when YTM changes its markup) |
-
 If Google ever refuses sign-in ("This browser or app may not be secure"), press `Alt` →
 **App → Sign-in identity** and try another option.
 
-Debugging the overlay: open DevTools (`Alt` → App → Toggle Developer Tools), pick the
-**Electron Isolated Context**, and use `__youputdesk.getState()`.
+## Contributing
 
-## Releasing
-
-1. `npm version patch` (or `minor`/`major`): bumps `package.json` and creates the `vX.Y.Z` tag.
-2. `git push --follow-tags`: GitHub Actions (`.github/workflows/release.yml`) tests, builds and uploads the
-   installer, the portable exes and `latest.yml` (the auto-update feed) to a **draft** release.
-3. Check the draft on GitHub, add release notes, and click **Publish**. Installed copies pick it up at their next
-   launch, or download it in the background within six hours and install it at the launch after that.
-
-Releases are only ever built by CI. Keep 2FA on the GitHub account and protect the `main` branch and `v*` tags,
-because anyone who can publish a release can ship an update.
-
-Each published release is also submitted to WinGet automatically (`.github/workflows/winget.yml`, which needs
-a `WINGET_TOKEN` secret: a classic token with the `public_repo` scope).
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to build and run
+it locally, and [Discussions](https://github.com/roderio/youputdesk/discussions) for questions and shared themes.
+If you like YouputDesk, a ⭐ helps other people find it.
 
 ## Code signing policy
 
@@ -97,3 +119,8 @@ until it's approved.)*
 requested by the user or the person installing or operating it. The optional features that contact other
 services (Discord status, online lyrics, update checks) stay off until you allow them on first launch. See
 [PRIVACY.md](PRIVACY.md).
+
+## Disclaimer
+
+YouputDesk is an independent open-source project. It is not affiliated with, endorsed by or sponsored by
+Google LLC or YouTube. YouTube and YouTube Music are trademarks of Google LLC.
