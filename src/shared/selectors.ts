@@ -29,8 +29,11 @@ export const SEL = {
   repeatButton: 'ytmusic-player-bar yt-icon-button.repeat',
   playerBar: 'ytmusic-player-bar',
   toggleButtons: 'ytmusic-wiz-player-controls button[aria-pressed]',
-  /** YTM's own volume slider. Driving it keeps YTM's UI and remembered volume in sync. */
-  volumeSlider: '.ytMusicMiniPlayerVolumePopup input[type=range], ytmusic-player-bar #volume-slider input',
+  /**
+   * YTM's own volume slider (a plain range input, or the player bar's tp-yt-paper-slider). Driving it
+   * keeps YTM's UI and the player in step. Its 0–100 position isn't linear in the player's volume.
+   */
+  volumeSlider: '.ytMusicMiniPlayerVolumePopup input[type=range], ytmusic-player-bar #volume-slider',
   /** Player-page tabs: Up next, Lyrics, Related… */
   playerPageTabs: 'ytmusic-player-page tp-yt-paper-tab',
 } as const

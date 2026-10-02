@@ -17,6 +17,7 @@ import { mountOverlay, shadowRoots } from './overlay/mount'
 import { readPlayer, videoElement } from './page'
 import { getState, initState, receiveSettings, setState, subscribe, updateSettings } from './store'
 import { setupTheme } from './theme'
+import { syncVolume } from './volume'
 
 const POLL_MS = 1000
 
@@ -41,6 +42,7 @@ function startPlayerLoop(): void {
       }
     }
     const player = readPlayer()
+    syncVolume(player)
     if (!player) return
     if (!samePlayer(getState().player, player)) setState({ player })
     ipcRenderer.send(IPC.playerState, player)

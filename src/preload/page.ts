@@ -171,16 +171,42 @@ export function playerCommand(cmd: Command, arg = 0): number | null {
   }
 }
 
-/** Change volume by `delta` (0–100 scale). Returns the new volume, or null if there's no player. */
+/**
+ * Read or move YTM's volume slider. Runs in the main world, because the player bar's slider is a
+ * Polymer element whose value is only visible there. Returns the slider position, or null without one.
+ */
+function sliderInPage(selector: string, target: number | null, delta: number): number | null {
+  const s = document.querySelector(selector) as (HTMLElement & { value?: unknown }) | null
+  if (!s || s.value === undefined || s.value === null || s.value === '') return null
+  const now = Number(s.value)
+  if (!Number.isFinite(now)) return null
+  if (target === null && delta === 0) return now
+  const next = Math.max(0, Math.min(100, Math.round(target ?? now + delta)))
+  const input = s.tagName === 'INPUT'
+  s.value = input ? String(next) : next
+  // YTM listens for these on its slider; it then sets the player volume to match.
+  if (input) s.dispatchEvent(new Event('input', { bubbles: true }))
+  s.dispatchEvent(new Event('change', { bubbles: true }))
+  return next
+}
+
+const slider = (target: number | null, delta = 0): number | null => {
+  try {
+    return inPage(sliderInPage, SEL.volumeSlider, target, delta)
+  } catch {
+    return null
+  }
+}
+
+/** The volume slider's position (0–100, what the user sees), or null if YTM hasn't drawn it. */
+export const readVolumeSlider = (): number | null => slider(null)
+
+/** Move the volume slider to `position` (0–100). Returns the new position, or null without a slider. */
+export const setVolumeSlider = (position: number): number | null => slider(position)
+
+/** Change volume by `delta` slider steps. Returns the new position, or null if there's no player. */
 export function changeVolume(delta: number): number | null {
-  const slider = document.querySelector<HTMLInputElement>(SEL.volumeSlider)
-  if (!slider) return playerCommand('volumeBy', delta)
-  const volume = Math.max(0, Math.min(100, Math.round(Number(slider.value) + delta)))
-  slider.value = String(volume)
-  // YTM listens for these on its slider; it then sets the player volume and remembers it.
-  slider.dispatchEvent(new Event('input', { bubbles: true }))
-  slider.dispatchEvent(new Event('change', { bubbles: true }))
-  return volume
+  return slider(null, delta) ?? playerCommand('volumeBy', delta)
 }
 
 /** Click YTM's like/dislike button. Returns false if the button couldn't be found. */

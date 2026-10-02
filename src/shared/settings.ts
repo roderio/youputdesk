@@ -51,6 +51,8 @@ export interface Settings {
   /** Mini player position (once dragged) and whether it stays open when clicking elsewhere. */
   mini: { position?: { x: number; y: number }; pinned: boolean }
   onboarding: { done: boolean }
+  /** YTM forgets its volume between launches, so we remember its volume slider position (0–100; null until first changed). */
+  playback: { volume: number | null }
   /**
    * Features that send data to a third party. None of them run until the user has seen the
    * first-run privacy screen (consented), and each can be switched off on its own.
@@ -78,11 +80,12 @@ export const DEFAULT_SETTINGS: Settings = {
   accessibility: { adChime: false, chimeVolume: 0.6, uiScale: 1, highContrast: false, reduceMotion: false, announce: true },
   mini: { pinned: false },
   onboarding: { done: false },
+  playback: { volume: null },
   privacy: { consented: false, onlineLyrics: true, updateChecks: true },
 }
 
 /** Settings the page overlay may change. Window, mini player and auth state stay main-process only. */
-export const PAGE_WRITABLE = ['eq', 'theme', 'ui', 'shortcuts', 'notifications', 'discord', 'tray', 'lyrics', 'accessibility', 'onboarding', 'privacy'] as const
+export const PAGE_WRITABLE = ['eq', 'theme', 'ui', 'shortcuts', 'notifications', 'discord', 'tray', 'lyrics', 'accessibility', 'onboarding', 'playback', 'privacy'] as const
 
 /** True once the user has agreed to a feature that talks to a third party. */
 export const allows = (s: Settings, feature: 'onlineLyrics' | 'updateChecks'): boolean => s.privacy.consented && s.privacy[feature]
