@@ -1,0 +1,30 @@
+# Builds the Windows installer and portable exes when a version tag is pushed, and uploads them
+# (with latest.yml, the auto-update feed) to a draft GitHub release. Review it, then publish.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      # Actions are pinned to commit SHAs so a moved tag can't change what runs. Dependabot bumps them.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Fail on known vulnerabilities in shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Tag matches package.json version
+        shell: bash
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

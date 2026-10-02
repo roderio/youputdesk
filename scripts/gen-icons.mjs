@@ -154,8 +154,9 @@ for (const [name, shape] of Object.entries(glyphs)) {
   writeFileSync(`resources/thumb-${name}.png`, png(16, render(16, [[shape, white]])))
   writeFileSync(`resources/thumb-${name}@2x.png`, png(32, render(32, [[shape, white]])))
 }
-writeFileSync(
-  'build/icon.ico',
-  ico([16, 24, 32, 48, 64, 128, 256].map((size) => ({ size, data: png(size, appIcon(size, { ringOn: size >= 48 })) }))),
-)
-console.log('Icons written to resources/ and build/icon.ico')
+// Taskbar, .exe and shortcuts use the same ring-less design as the tray icon. build/ is for the
+// installer; resources/ ships with the app so the window can set it (needed in development too).
+const windowsIcon = ico([16, 24, 32, 48, 64, 128, 256].map((size) => ({ size, data: png(size, appIcon(size, { ringOn: false })) })))
+writeFileSync('build/icon.ico', windowsIcon)
+writeFileSync('resources/icon.ico', windowsIcon)
+console.log('Icons written to resources/, build/icon.ico and resources/icon.ico')

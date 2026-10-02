@@ -92,6 +92,7 @@ function openYtmLyrics(): void {
 }
 
 function LyricsBody({ big }: { big?: boolean }) {
+  const online = useUi((s) => s.settings.privacy.consented && s.settings.privacy.onlineLyrics)
   const player = useUi((s) => s.player)
   const scale = useUi((s) => s.settings.lyrics.fontScale)
   const perf = useUi((s) => s.settings.ui.performanceMode)
@@ -116,6 +117,21 @@ function LyricsBody({ big }: { big?: boolean }) {
     )
   }
   if (status === 'instrumental') return <div class="lyrics-empty"><Icon name="note" size={28} /><p>This one's instrumental. Enjoy!</p></div>
+  if (status === 'none' && !online) {
+    return (
+      <div class="lyrics-empty">
+        <Icon name="lyrics" size={28} />
+        <p>Online lyrics are off. Turning them on sends the song title and artist to lrclib.net.</p>
+        <div class="actions">
+          <Button onClick={() => {
+            updateSettings('privacy', { onlineLyrics: true })
+            retry()
+          }}>Turn on</Button>
+          <Button onClick={openYtmLyrics}>YouTube Music lyrics</Button>
+        </div>
+      </div>
+    )
+  }
   if (status === 'none' || status === 'error') {
     return (
       <div class="lyrics-empty">

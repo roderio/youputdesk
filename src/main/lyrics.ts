@@ -4,6 +4,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { LyricsQuery, LyricsResult } from '../shared/ipc'
 import { cleanArtist, cleanTitle, pickBest, stripTimestamps, type LrcLibTrack, type Pick } from '../shared/lyrics-match'
+import { allows } from '../shared/settings'
+import { store } from './store'
 
 const API = 'https://lrclib.net/api'
 const cacheDir = () => join(app.getPath('userData'), 'lyrics-cache-v2')
@@ -70,6 +72,8 @@ export async function getLyrics(q: LyricsQuery): Promise<LyricsResult | null> {
       // Not cached yet.
     }
   }
+  // Song details only leave the PC once the user has allowed online lyrics.
+  if (!allows(store.store, 'onlineLyrics')) return null
   // Network errors throw and aren't cached, so the next play retries. "Not found" is only
   // remembered for this session, since LRCLIB is community-filled and may have it later.
   const result = await fetchLyrics(q)

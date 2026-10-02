@@ -3,9 +3,10 @@
  * an ordinary browser. It shares the YTM partition, so the cookies it sets are what
  * the main window uses afterwards.
  */
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { PARTITION } from '../shared/config'
+import { openExternal } from './external'
 import { isAuthAllowed, isYtm } from './navigation'
 import { store } from './store'
 import { firefoxUA, markFirefox, unmarkFirefox } from './ua'
@@ -45,14 +46,14 @@ export function openSignIn(url: string, parent: BrowserWindow): void {
 
   win.webContents.setWindowOpenHandler(({ url: target }) => {
     if (isAuthAllowed(target)) return { action: 'allow' }
-    shell.openExternal(target)
+    openExternal(target)
     return { action: 'deny' }
   })
 
   win.webContents.on('will-navigate', (event, target) => {
     if (!isAuthAllowed(target)) {
       event.preventDefault()
-      shell.openExternal(target)
+      openExternal(target)
     }
   })
 

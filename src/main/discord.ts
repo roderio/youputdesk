@@ -17,7 +17,10 @@ let retryTimer: NodeJS.Timeout | undefined
 let updateTimer: NodeJS.Timeout | undefined
 let lastKey = ''
 
-export const discordStatus = (): DiscordStatus => ({ enabled: store.get('discord.enabled'), connected })
+/** Presence is public, so it stays off until the user has seen the privacy screen and turned it on. */
+const wanted = (): boolean => store.get('privacy.consented') && store.get('discord.enabled')
+
+export const discordStatus = (): DiscordStatus => ({ enabled: wanted(), connected })
 
 function setConnected(value: boolean): void {
   connected = value
@@ -26,7 +29,7 @@ function setConnected(value: boolean): void {
 
 async function connect(): Promise<void> {
   clearTimeout(retryTimer)
-  if (!store.get('discord.enabled') || client) return
+  if (!wanted() || client) return
   const c = new Client({ clientId: DISCORD_CLIENT_ID, transport: { type: 'ipc' } })
   client = c
   c.on('ready', () => {
@@ -65,6 +68,13 @@ const trim = (s: string, fallback: string): string => {
   return t.length >= 2 ? t : fallback
 }
 
+/** Discord rejects the whole activity if the image URL is over 300 characters, and YTM's cover URLs often are. */
+const MAX_IMAGE_URL = 300
+const coverImage = (s: PlayerState): string | undefined => {
+  if (s.artwork && s.artwork.length <= MAX_IMAGE_URL) return s.artwork
+  return /^[\w-]{1,32}$/.test(s.videoId) ? `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg` : undefined
+}
+
 async function update(): Promise<void> {
   const s: PlayerState | null = player.state
   const user = client?.user
@@ -82,15 +92,16 @@ async function update(): Promise<void> {
     await user.setActivity({
       type: LISTENING,
       details: trim(s.title, 'Unknown song'),
-      state: trim(s.artist, 'Unknown artist'),
-      largeImageKey: s.artwork || undefined,
+      state: trim(s.playing ? s.artist : `Paused · ${s.artist}`, 'Unknown artist'),
+      largeImageKey: coverImage(s),
       largeImageText: trim(s.playing ? s.album || s.title : `Paused · ${s.title}`, 'YouTube Music'),
       ...(s.playing && s.duration
         ? { startTimestamp: now - s.position * 1000, endTimestamp: now + (s.duration - s.position) * 1000 }
         : {}),
       buttons: [{ label: 'Listen on YouTube Music', url: `https://music.youtube.com/watch?v=${s.videoId}` }],
     })
-  } catch {
+  } catch (err) {
+    console.warn('[YouputDesk] Discord status update failed:', err instanceof Error ? err.message : err)
     lastKey = ''
   }
 }
@@ -110,10 +121,15 @@ export function setupDiscord(): void {
     if (Math.abs(s.position - lastPos) > 3) scheduleUpdate()
     lastPos = s.position + 1
   })
-  store.onDidChange('discord', (next, prev) => {
-    if (next?.enabled && !prev?.enabled) connect()
-    else if (!next?.enabled && prev?.enabled) disconnect()
+  let was = wanted()
+  const sync = () => {
+    const now = wanted()
+    if (now && !was) connect()
+    else if (!now && was) disconnect()
     else scheduleUpdate()
-  })
+    was = now
+  }
+  store.onDidChange('discord', sync)
+  store.onDidChange('privacy', sync)
   connect()
 }

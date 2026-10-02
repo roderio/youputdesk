@@ -1,5 +1,5 @@
 /** Shared handles: the main window and helpers to reach it. */
-import { app, BrowserWindow, nativeImage } from 'electron'
+import { app, BrowserWindow, nativeImage, screen } from 'electron'
 import { join } from 'node:path'
 import type { ActionId } from '../shared/shortcuts'
 import { IPC } from '../shared/ipc'
@@ -47,3 +47,10 @@ export function isMainFocused(): boolean {
 
 export const asset = (name: string): string => join(app.getAppPath(), 'resources', name)
 export const assetImage = (name: string) => nativeImage.createFromPath(asset(name))
+
+/** True if any part of the rectangle is on a connected display's work area. */
+export function isOnScreen(r: Electron.Rectangle): boolean {
+  return screen.getAllDisplays().some(({ workArea: a }) =>
+    r.x < a.x + a.width && r.x + r.width > a.x && r.y < a.y + a.height && r.y + r.height > a.y,
+  )
+}

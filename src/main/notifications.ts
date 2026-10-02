@@ -31,6 +31,19 @@ async function artIcon(url: string) {
   return assetImage('icon.png')
 }
 
+/** From Settings: shows a toast right away, even with the window focused, so the user can check Windows lets us notify. */
+export function showTestNotification(): void {
+  if (!Notification.isSupported()) return
+  const s = player.state
+  const body = s?.title && !s.ad ? `Now playing: ${s.title}${s.artist ? ` · ${s.artist}` : ''}` : 'Notifications are working.'
+  show('YouputDesk', body, showMainWindow)
+}
+
+/** A downloaded update. Shown even with the window focused: it's a one-off and there's no in-page banner for it. */
+export function showUpdateReady(version: string): void {
+  show('Update ready', `YouputDesk ${version} installs when you quit.`, showMainWindow)
+}
+
 export function setupNotifications(): void {
   player.on('ad', (ad) => {
     if (!ad.active) {

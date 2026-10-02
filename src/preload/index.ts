@@ -3,7 +3,7 @@
  * anything here. It must stay inert outside YTM, since the main window also briefly shows
  * consent and sign-out pages.
  */
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, webFrame } from 'electron'
 import { IPC, type DiscordStatus, type PlayerState } from '../shared/ipc'
 import type { Settings } from '../shared/settings'
 import type { ActionId } from '../shared/shortcuts'
@@ -11,6 +11,7 @@ import type { Palette } from '../shared/themes'
 import { runAction, type Command } from './actions'
 import { skipLog, watchAds } from './ads'
 import { audio, AudioEngine } from './audio'
+import { setupChime } from './chime'
 import { setupKeys } from './keys'
 import { mountOverlay, shadowRoots } from './overlay/mount'
 import { readPlayer, videoElement } from './page'
@@ -69,6 +70,19 @@ function startPlayerLoop(): void {
   })
 }
 
+/** Text and UI size from Accessibility settings, applied as page zoom (YTM and our overlay alike). */
+function setupZoom(): void {
+  let last = 0
+  const apply = () => {
+    const scale = getState().settings.accessibility.uiScale
+    if (scale === last || !(scale >= 0.5 && scale <= 3)) return
+    last = scale
+    webFrame.setZoomFactor(scale)
+  }
+  apply()
+  subscribe(apply)
+}
+
 async function start(): Promise<void> {
   const [settings, palette, shortcutStatus, discord, info] = await Promise.all([
     ipcRenderer.invoke(IPC.settingsGet) as Promise<Settings>,
@@ -100,16 +114,20 @@ async function start(): Promise<void> {
   ipcRenderer.on(IPC.shortcutStatus, (_e, s: { failed: ActionId[] }) => setState({ failedShortcuts: s.failed }))
   ipcRenderer.on(IPC.discordStatus, (_e, d: DiscordStatus) => setState({ discord: d }))
   setupKeys()
+  setupZoom()
 
   const onDom = () => {
     setupTheme()
     mountOverlay()
+    const chime = setupChime()
     watchAds((ad) => {
       setState({ ad })
       ipcRenderer.send(IPC.adState, ad)
+      chime(ad)
     })
     startPlayerLoop()
-    if (!settings.onboarding.done) setTimeout(() => setState({ welcome: true }), 1500)
+    // Before consent the privacy screen shows instead, and opens the tour when it's answered.
+    if (settings.privacy.consented && !settings.onboarding.done) setTimeout(() => setState({ welcome: true }), 1500)
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onDom, { once: true })
   else onDom()

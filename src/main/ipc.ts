@@ -2,22 +2,34 @@ import { app, ipcMain } from 'electron'
 import { IPC, type AdState, type LyricsQuery } from '../shared/ipc'
 import { PAGE_WRITABLE, type PageWritableKey, type Settings } from '../shared/settings'
 import { broadcast, ctx, showMainWindow, toggleMainWindow } from './context'
+import { deleteAllData } from './data'
+import { openExternal } from './external'
 import { discordStatus } from './discord'
 import { getLyrics } from './lyrics'
-import { toggleMiniPlayer } from './mini'
+import { resetMiniPosition, toggleMiniPlayer } from './mini'
+import { showTestNotification } from './notifications'
 import { currentPalette } from './palette'
 import { parseState, player } from './player'
 import { shortcutStatus } from './shortcuts'
 import { store } from './store'
 
-const APP_ACTIONS = { toggleWindow: toggleMainWindow, showWindow: showMainWindow, miniPlayer: toggleMiniPlayer } as const
+const APP_ACTIONS = {
+  toggleWindow: toggleMainWindow,
+  showWindow: showMainWindow,
+  miniPlayer: toggleMiniPlayer,
+  resetMiniPosition,
+  testNotification: showTestNotification,
+  deleteAllData,
+  privacyPolicy: () => openExternal('https://github.com/roderio/youputdesk/blob/main/PRIVACY.md'),
+} as const
 
 /** Only accept messages from our own windows' top frames, never from subframes (ads, embeds). */
 const fromMain = (e: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent): boolean =>
   !!ctx.main && e.sender === ctx.main.webContents && e.senderFrame === ctx.main.webContents.mainFrame
 
 export function setupIpc(): void {
-  ipcMain.handle(IPC.settingsGet, () => store.store)
+  // Even read-only answers go only to our own page: settings and status are nobody else's business.
+  ipcMain.handle(IPC.settingsGet, (e) => (fromMain(e) ? store.store : null))
 
   ipcMain.handle(IPC.settingsSet, (e, key: unknown, value: unknown) => {
     if (!fromMain(e) || !PAGE_WRITABLE.includes(key as PageWritableKey) || typeof value !== 'object' || value === null) return
@@ -55,10 +67,10 @@ export function setupIpc(): void {
   })
 
   ipcMain.handle(IPC.lyricsGet, (e, q: LyricsQuery) => (fromMain(e) ? getLyrics(q) : null))
-  ipcMain.handle(IPC.palette, () => currentPalette())
-  ipcMain.handle(IPC.shortcutStatus, () => shortcutStatus())
-  ipcMain.handle(IPC.discordStatus, () => discordStatus())
-  ipcMain.handle(IPC.appInfo, () => ({ version: app.getVersion(), identity: store.get('auth.identity') }))
+  ipcMain.handle(IPC.palette, (e) => (fromMain(e) ? currentPalette() : null))
+  ipcMain.handle(IPC.shortcutStatus, (e) => (fromMain(e) ? shortcutStatus() : null))
+  ipcMain.handle(IPC.discordStatus, (e) => (fromMain(e) ? discordStatus() : null))
+  ipcMain.handle(IPC.appInfo, (e) => (fromMain(e) ? { version: app.getVersion(), identity: store.get('auth.identity') } : null))
 
   // Every window (page overlay, mini player) sees settings changes immediately. Window-bounds
   // saves happen on every move/resize and the page doesn't care about them, so skip those.

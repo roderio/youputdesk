@@ -1,22 +1,24 @@
 // Must be first: picks the profile folder before anything reads userData.
 import './profile'
-import { app, Menu, session } from 'electron'
-import { PARTITION, YTM_URL } from '../shared/config'
+import { app, Menu } from 'electron'
 import { ctx, showMainWindow } from './context'
+import { confirmDeleteAllData } from './data'
 import { setupDiscord } from './discord'
 import { setupIpc } from './ipc'
 import { setupMiniPlayer } from './mini'
 import { setupNotifications } from './notifications'
 import { setupPalette } from './palette'
+import { setupSecurity } from './security'
 import { setupShortcuts, teardownShortcuts } from './shortcuts'
 import { store, type Identity } from './store'
 import { setupTray } from './tray'
 import { applyIdentity, setupIdentity } from './ua'
+import { checkForUpdatesNow, setupUpdater } from './updater'
 import { createMainWindow } from './window'
 
 // Toasts need an app identity on Windows. The installer registers this one; in development
-// Electron's default identity is the one that can actually show toasts.
-if (app.isPackaged) app.setAppUserModelId('com.youputdesk.app')
+// Windows only shows toasts for the running executable's path.
+app.setAppUserModelId(app.isPackaged ? 'com.youputdesk.app' : process.execPath)
 
 const identities: { id: Identity; label: string }[] = [
   { id: 'native', label: 'Electron default (recommended)' },
@@ -45,13 +47,9 @@ function buildMenu(): void {
             },
           })),
         },
-        {
-          label: 'Sign out and clear data',
-          click: async () => {
-            await session.fromPartition(PARTITION).clearStorageData()
-            ctx.main?.loadURL(YTM_URL)
-          },
-        },
+        { label: 'Delete all my data…', click: confirmDeleteAllData },
+        { type: 'separator' },
+        { label: 'Check for updates', click: checkForUpdatesNow },
         { type: 'separator' },
         {
           label: 'Quit',
@@ -67,6 +65,8 @@ function buildMenu(): void {
   ])
   Menu.setApplicationMenu(menu)
 }
+
+setupSecurity()
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
@@ -85,6 +85,7 @@ if (!app.requestSingleInstanceLock()) {
     setupNotifications()
     setupPalette()
     setupDiscord()
+    setupUpdater()
   })
 
   app.on('before-quit', () => (ctx.quitting = true))

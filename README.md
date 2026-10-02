@@ -13,6 +13,29 @@ and Premium just work) and adds:
 
 Everything lives behind the toolbar added to YouTube Music's top bar. Press `Ctrl+/` for all shortcuts.
 
+## Install
+
+1. Download **`YouputDesk-Setup-<version>.exe`** from the [latest release](https://github.com/roderio/youputdesk/releases/latest).
+2. Open it. YouputDesk installs in a few seconds (no admin rights needed) and starts.
+
+Windows may show **"Windows protected your PC"** because the installer isn't code-signed yet. Click
+**More info → Run anyway**.
+
+It runs on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs, and it updates itself. To uninstall,
+go to Windows Settings → Apps; uninstalling also removes all of its data.
+
+**Portable:** prefer not to install? Download `YouputDesk-<version>-portable.exe`, or the smaller
+`-x64` / `-arm64` one for your PC, and run it from anywhere, even a USB stick. It keeps its data in a
+`YouputDesk-data` folder beside the exe and doesn't auto-update. Your Google sign-in is encrypted for
+your Windows account, so on another PC you'll be asked to sign in again.
+
+## Privacy & security
+
+No accounts, no analytics, no tracking. The first time it opens, YouputDesk asks which optional features
+may talk to other services (Discord status, online lyrics, update checks), and nothing is sent until you
+choose. See [PRIVACY.md](PRIVACY.md) for exactly what goes where, and [SECURITY.md](SECURITY.md) for how the
+app is hardened and how to report a vulnerability.
+
 ## Development
 
 ```sh
@@ -20,7 +43,7 @@ npm install
 npm run dev        # run with hot reload
 npm test           # unit tests
 npm run typecheck
-npm run dist       # typecheck + test + build the NSIS installer into dist/
+npm run dist       # typecheck + test + build the installer and portable exes into dist/
 npm run icons      # regenerate icons in resources/ and build/icon.ico
 ```
 
@@ -42,3 +65,32 @@ If Google ever refuses sign-in ("This browser or app may not be secure"), press 
 
 Debugging the overlay: open DevTools (`Alt` → App → Toggle Developer Tools), pick the
 **Electron Isolated Context**, and use `__youputdesk.getState()`.
+
+## Releasing
+
+1. `npm version patch` (or `minor`/`major`): bumps `package.json` and creates the `vX.Y.Z` tag.
+2. `git push --follow-tags`: GitHub Actions (`.github/workflows/release.yml`) tests, builds and uploads the
+   installer, the portable exes and `latest.yml` (the auto-update feed) to a **draft** release.
+3. Check the draft on GitHub, add release notes, and click **Publish**. Installed copies pick it up within six
+   hours and install it when the app is next quit.
+
+Releases are only ever built by CI. Keep 2FA on the GitHub account and protect the `main` branch and `v*` tags,
+because anyone who can publish a release can ship an update.
+
+### Code signing (later)
+
+Signing removes the SmartScreen warning and lets the updater reject updates that you didn't sign. With
+[Azure Trusted Signing](https://learn.microsoft.com/azure/trusted-signing/), add to `build.win` in
+`package.json`:
+
+```json
+"azureSignOptions": {
+  "publisherName": "<name on the certificate>",
+  "endpoint": "https://<region>.codesigning.azure.net",
+  "certificateProfileName": "<profile>",
+  "codeSigningAccountName": "<account>"
+}
+```
+
+and give the release job `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` secrets. With a
+`.pfx` certificate instead, set the `CSC_LINK` and `CSC_KEY_PASSWORD` secrets.
