@@ -1,0 +1,22 @@
+# When a release is published, opens a pull request at microsoft/winget-pkgs that adds the new
+# version, so `winget upgrade` picks it up. Needs a WINGET_TOKEN secret: a classic personal access
+# token with the public_repo scope (it pushes to the roderio/winget-pkgs fork).
+name: Publish to WinGet
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+
+jobs:
+  winget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: vedantmgoyal9/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
+        with:
+          identifier: roderio.YouputDesk
+          # Only the installer: the portable exes aren't installable packages.
+          installers-regex: 'YouputDesk-Setup-.*\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}
