@@ -69,6 +69,11 @@ export function createMainWindow(): BrowserWindow {
     }
   })
 
+  // Once music has played, YTM adds a "Leave site?" beforeunload guard. Electron shows no dialog for
+  // it and silently cancels the close instead, which would block Quit (and installing updates on
+  // quit). There's nothing unsaved to lose, so always let the page go.
+  win.webContents.on('will-prevent-unload', (e) => e.preventDefault())
+
   setupTaskbar(win)
 
   // Sign-in goes to the preload-free auth window; anything outside YouTube goes to the default browser.
