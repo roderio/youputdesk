@@ -1,4 +1,4 @@
-/** System tray icon: click for the mini player, right-click for controls. */
+/** System tray icon: click to open the app, right-click for controls and the mini player. */
 import { app, Menu, Tray } from 'electron'
 import { assetImage, ctx, sendAction, showMainWindow } from './context'
 import { setMiniAnchor, toggleMiniPlayer } from './mini'
@@ -45,13 +45,14 @@ function buildMenu(): Menu {
 export function setupTray(): void {
   tray = new Tray(assetImage('tray.png'))
   tray.setToolTip('YouputDesk')
-  tray.on('click', () => {
-    if (tray) setMiniAnchor(tray.getBounds())
-    toggleMiniPlayer()
-  })
-  tray.on('double-click', showMainWindow)
+  tray.on('click', showMainWindow)
   // Build the menu on demand so it always shows the current song and play state.
-  tray.on('right-click', () => tray?.popUpContextMenu(buildMenu()))
+  tray.on('right-click', () => {
+    if (!tray) return
+    // The menu's Mini player item pops the card up above the tray icon.
+    setMiniAnchor(tray.getBounds())
+    tray.popUpContextMenu(buildMenu())
+  })
 
   let lastTip = ''
   player.on('state', (s) => {

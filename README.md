@@ -8,7 +8,7 @@ and Premium just work) and adds:
 - **Themes**: built-in palettes, an "Album Art" theme that follows the cover, a theme editor, import/export
 - **Shortcuts**: in-app and global hotkeys, all rebindable, with conflict warnings
 - **Ad alerts**: a banner and Windows notification when an ad plays, with one-key skip when YouTube allows it
-- **Windows integration**: tray icon with mini player, taskbar buttons and progress, media keys / media overlay
+- **Windows integration**: tray icon (click to open, right-click for controls and mini player), taskbar buttons and progress, media keys / media overlay
 - **Discord**: "Listening to…" status
 
 Everything lives behind the toolbar added to YouTube Music's top bar. Press `Ctrl+/` for all shortcuts.

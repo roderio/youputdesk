@@ -64,7 +64,7 @@ const FEATURES: { icon: IconName; title: string; text: string; panel?: Panel; ac
   { icon: 'palette', title: 'Themes', text: 'Recolour the app, or let the album art pick the colours.', panel: 'themes', action: 'openThemes' },
   { icon: 'keyboard', title: 'Shortcuts', text: 'Control music from any app with global hotkeys.', panel: 'shortcuts', action: 'openShortcuts' },
   { icon: 'bell', title: 'Ad alerts', text: 'Get told when an ad can be skipped, and skip it with one key.', action: 'skipAd' },
-  { icon: 'mini', title: 'Tray & mini player', text: 'Closing keeps the music going. Click the tray icon for controls.', action: 'miniPlayer' },
+  { icon: 'mini', title: 'Tray & mini player', text: 'Closing keeps the music going. Click the tray icon to come back, or right-click it for controls.', action: 'miniPlayer' },
 ]
 
 export function Welcome() {

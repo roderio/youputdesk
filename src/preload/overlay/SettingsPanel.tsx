@@ -102,7 +102,7 @@ export function SettingsPanel() {
         <Row icon="window" title="Keep playing in the tray when closed" hint="Right-click the tray icon to quit">
           <Switch checked={s.tray.closeToTray} label="Close to tray" onChange={(closeToTray) => updateSettings('tray', { closeToTray })} />
         </Row>
-        <Row icon="mini" title="Mini player" hint={<>Click the tray icon, or press <Keys accelerator={s.shortcuts.miniPlayer.accelerator} muted />. Drag it anywhere to keep it there</>}>
+        <Row icon="mini" title="Mini player" hint={<>Right-click the tray icon, or press <Keys accelerator={s.shortcuts.miniPlayer.accelerator} muted />. Drag it anywhere to keep it there</>}>
           <Button onClick={() => ipcRenderer.send(IPC.appAction, 'miniPlayer')}>Open</Button>
         </Row>
         <Row title="Mini player position" hint="Put it back above the tray icon">
