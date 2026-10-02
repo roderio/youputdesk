@@ -21,18 +21,19 @@
 YouputDesk runs the real music.youtube.com, so Google sign-in, your library and Premium all work as usual.
 It then adds what the browser tab can't do:
 
+- **Equalizer**: 10 bands, presets, bass boost, loudness normalization and a limiter so boosts never distort
+- **Synced lyrics**: line by line from [LRCLIB](https://lrclib.net), click a line to jump there, full-screen mode
+- **Tray and mini player**: keeps playing when closed; a small always-on-top player you can drag anywhere
+- **Windows integration**: taskbar play/pause buttons and progress, media keys and the Windows media overlay
+
 | | |
 | --- | --- |
-| **Equalizer**: 10 bands, presets, bass boost, loudness normalization and a limiter so boosts never distort | <img src="docs/screenshots/equalizer.png" width="400" alt="Equalizer panel"> |
-| **Synced lyrics**: line by line from [LRCLIB](https://lrclib.net), click a line to jump there, full-screen mode | <img src="docs/screenshots/lyrics.png" width="400" alt="Synced lyrics"> |
-| **Themes**: built-in palettes, an "Album Art" theme that follows the cover, a theme editor, import/export | <img src="docs/screenshots/themes.png" width="400" alt="Theme picker"> |
-| **Tray and mini player**: keeps playing when closed; a small always-on-top player you can drag anywhere | <img src="docs/screenshots/mini-player.png" width="400" alt="Mini player"> |
+| **Themes**: built-in palettes, an "Album Art" theme that follows the cover, a theme editor, import/export | <img src="docs/screenshots/themes-panel.png" width="300" alt="Theme picker with AMOLED, Midnight, Sakura and other palettes"> |
+| **Shortcuts**: in-app and global hotkeys, all rebindable, with conflict warnings (`Ctrl+/` lists them) | <img src="docs/screenshots/shortcuts-panel.png" width="300" alt="Shortcuts panel listing rebindable hotkeys"> |
+| **Ad alerts and accessibility**: a banner and Windows notification when an ad plays, one-key skip when YouTube allows it, high contrast, reduced motion and screen reader announcements | <img src="docs/screenshots/settings-panel.png" width="300" alt="Settings panel with ad alerts and accessibility options"> |
 
 Plus:
 
-- **Shortcuts**: in-app and global hotkeys, all rebindable, with conflict warnings (`Ctrl+/` lists them)
-- **Ad alerts**: a banner and Windows notification when an ad plays, with one-key skip when YouTube allows it
-- **Windows integration**: taskbar play/pause buttons and progress, media keys and the Windows media overlay
 - **Discord**: "Listening to…" status
 - **Private by default**: no accounts, no analytics, and nothing leaves your PC until you allow it
 
