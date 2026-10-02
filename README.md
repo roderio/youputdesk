@@ -77,20 +77,22 @@ Debugging the overlay: open DevTools (`Alt` → App → Toggle Developer Tools),
 Releases are only ever built by CI. Keep 2FA on the GitHub account and protect the `main` branch and `v*` tags,
 because anyone who can publish a release can ship an update.
 
-### Code signing (later)
+Each published release is also submitted to WinGet automatically (`.github/workflows/winget.yml`, which needs
+a `WINGET_TOKEN` secret: a classic token with the `public_repo` scope).
 
-Signing removes the SmartScreen warning and lets the updater reject updates that you didn't sign. With
-[Azure Trusted Signing](https://learn.microsoft.com/azure/trusted-signing/), add to `build.win` in
-`package.json`:
+## Code signing policy
 
-```json
-"azureSignOptions": {
-  "publisherName": "<name on the certificate>",
-  "endpoint": "https://<region>.codesigning.azure.net",
-  "certificateProfileName": "<profile>",
-  "codeSigningAccountName": "<account>"
-}
-```
+Free code signing for Windows releases is provided by [SignPath.io](https://about.signpath.io), with a
+certificate from the [SignPath Foundation](https://signpath.org). *(Application pending: releases are unsigned
+until it's approved.)*
 
-and give the release job `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` secrets. With a
-`.pfx` certificate instead, set the `CSC_LINK` and `CSC_KEY_PASSWORD` secrets.
+- Only release builds made by GitHub Actions from this repository's tagged commits are signed. Nothing built
+  on a personal machine is.
+- Committers and reviewers: [roderio](https://github.com/roderio)
+- Approvers: [roderio](https://github.com/roderio)
+- Every team member uses multi-factor authentication for GitHub and SignPath.
+
+**Privacy:** this program will not transfer any information to other networked systems unless specifically
+requested by the user or the person installing or operating it. The optional features that contact other
+services (Discord status, online lyrics, update checks) stay off until you allow them on first launch. See
+[PRIVACY.md](PRIVACY.md).
