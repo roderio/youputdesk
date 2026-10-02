@@ -1,6 +1,7 @@
 /** Latest player state reported by the page, and the hub every feature listens to. */
 import { EventEmitter } from 'node:events'
 import type { AdState, PlayerState } from '../shared/ipc'
+import { isArtworkUrl } from './navigation'
 
 interface PlayerEvents {
   /** Any state update (about once a second while playing, immediately on changes). */
@@ -12,15 +13,20 @@ interface PlayerEvents {
   ad: [AdState]
 }
 
-class Player extends EventEmitter<PlayerEvents> {
+export class Player extends EventEmitter<PlayerEvents> {
   state: PlayerState | null = null
   ad: AdState = { active: false, skippable: false }
+  /** Last song announced by 'track'. During an ad YTM may already report the next song's id, so compare against this rather than the previous state. */
+  private announced = ''
 
   update(next: PlayerState): void {
     const prev = this.state
     this.state = next
     this.emit('state', next)
-    if (next.videoId && next.videoId !== prev?.videoId && !next.ad) this.emit('track', next)
+    if (next.videoId && next.videoId !== this.announced && !next.ad) {
+      this.announced = next.videoId
+      this.emit('track', next)
+    }
     if (prev && prev.playing !== next.playing) this.emit('playback', next)
   }
 
@@ -45,7 +51,7 @@ export function parseState(value: unknown): PlayerState | null {
     title: str(v.title),
     artist: str(v.artist),
     album: str(v.album),
-    artwork: /^https:\/\//.test(artwork) ? artwork : '',
+    artwork: isArtworkUrl(artwork) ? artwork : '',
     duration: num(v.duration),
     position: num(v.position),
     playing: v.playing === true,

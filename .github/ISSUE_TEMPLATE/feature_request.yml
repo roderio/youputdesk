@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest an idea for YouputDesk
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: What problem it solves for you, and how you imagine it working.
+    validations:
+      required: true

@@ -35,7 +35,33 @@ export interface Settings {
   discord: { enabled: boolean; showWhenPaused: boolean }
   tray: { closeToTray: boolean; trayHintShown: boolean }
   lyrics: { fontScale: number }
+  accessibility: {
+    /** Chime when an ad becomes skippable, repeated a few times until it's skipped. */
+    adChime: boolean
+    /** 0–1 */
+    chimeVolume: number
+    /** Page zoom for YouTube Music and our overlay. */
+    uiScale: number
+    highContrast: boolean
+    /** Turns off animations and transitions, but unlike performance mode keeps blur and the visualizer. */
+    reduceMotion: boolean
+    /** Screen-reader announcements for song changes and skippable ads. */
+    announce: boolean
+  }
+  /** Mini player position (once dragged) and whether it stays open when clicking elsewhere. */
+  mini: { position?: { x: number; y: number }; pinned: boolean }
   onboarding: { done: boolean }
+  /**
+   * Features that send data to a third party. None of them run until the user has seen the
+   * first-run privacy screen (consented), and each can be switched off on its own.
+   */
+  privacy: {
+    consented: boolean
+    /** Look up lyrics on lrclib.net (sends the song title and artist). */
+    onlineLyrics: boolean
+    /** Check GitHub for new versions and install them on quit. */
+    updateChecks: boolean
+  }
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -46,14 +72,22 @@ export const DEFAULT_SETTINGS: Settings = {
   ui: { performanceMode: false },
   shortcuts: defaultBindings(),
   notifications: { ads: true, trackChange: false },
-  discord: { enabled: true, showWhenPaused: false },
+  discord: { enabled: false, showWhenPaused: false },
   tray: { closeToTray: true, trayHintShown: false },
   lyrics: { fontScale: 1 },
+  accessibility: { adChime: false, chimeVolume: 0.6, uiScale: 1, highContrast: false, reduceMotion: false, announce: true },
+  mini: { pinned: false },
   onboarding: { done: false },
+  privacy: { consented: false, onlineLyrics: true, updateChecks: true },
 }
 
-/** Settings the page overlay may change. Window and auth state stay main-process only. */
-export const PAGE_WRITABLE = ['eq', 'theme', 'ui', 'shortcuts', 'notifications', 'discord', 'tray', 'lyrics', 'onboarding'] as const
+/** Settings the page overlay may change. Window, mini player and auth state stay main-process only. */
+export const PAGE_WRITABLE = ['eq', 'theme', 'ui', 'shortcuts', 'notifications', 'discord', 'tray', 'lyrics', 'accessibility', 'onboarding', 'privacy'] as const
+
+/** True once the user has agreed to a feature that talks to a third party. */
+export const allows = (s: Settings, feature: 'onlineLyrics' | 'updateChecks'): boolean => s.privacy.consented && s.privacy[feature]
+
+export const UI_SCALES = [0.8, 0.9, 1, 1.1, 1.25, 1.5] as const
 export type PageWritableKey = (typeof PAGE_WRITABLE)[number]
 
 /** Fill keys missing from stored settings (e.g. added in a newer version) from the defaults. */

@@ -49,6 +49,12 @@ export interface DiscordStatus {
   connected: boolean
 }
 
+/** Mini player display preferences, pushed by main. */
+export interface MiniPrefs {
+  pinned: boolean
+  reduceMotion: boolean
+}
+
 export const IPC = {
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
@@ -69,4 +75,5 @@ export const IPC = {
   /** mini player ↔ main */
   miniState: 'mini:state',
   miniCommand: 'mini:command',
+  miniPrefs: 'mini:prefs',
 } as const

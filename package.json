@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "icons": "node scripts/gen-icons.mjs",
-    "dist": "npm run typecheck && npm test && electron-vite build && electron-builder --win nsis"
+    "dist": "npm run typecheck && npm test && electron-vite build && electron-builder --win",
+    "release": "npm run typecheck && npm test && electron-vite build && electron-builder --win --publish always"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
@@ -27,14 +28,16 @@
   "dependencies": {
     "@xhayper/discord-rpc": "^1.5.1",
     "electron-store": "^11.0.2",
+    "electron-updater": "^6.8.9",
     "preact": "^10.29.8"
   },
   "allowScripts": {
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true,
+    "electron@44.5.1": true,
     "electron-winstaller": false
   },
-  "author": "YouputDesk",
+  "author": "roderio",
   "build": {
     "appId": "com.youputdesk.app",
     "productName": "YouputDesk",
@@ -52,22 +55,55 @@
         {
           "target": "nsis",
           "arch": [
-            "x64"
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "arm64"
           ]
         }
       ],
       "icon": "build/icon.ico"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "YouputDesk",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "asar": true,
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true,
+      "enableCookieEncryption": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "roderio",
+      "repo": "youputdesk",
+      "releaseType": "draft"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable-${arch}.${ext}"
     }
-  }
+  },
+  "homepage": "https://github.com/roderio/youputdesk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roderio/youputdesk.git"
+  },
+  "license": "MIT"
 }

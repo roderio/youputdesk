@@ -1,7 +1,62 @@
+import { useState } from 'preact/hooks'
 import { ACTION_IDS, ACTIONS } from '../../shared/shortcuts'
-import { openPanel, setState, updateSettings, useUi, type Panel } from '../store'
+import { getState, openPanel, setState, updateSettings, useUi, type Panel } from '../store'
 import { Icon, type IconName } from './icons'
-import { Button, IconButton, Keys } from './ui'
+import { Button, IconButton, Keys, Row, Section, Switch } from './ui'
+
+/** The three features that send anything to a third party. Shared with the Privacy section in Settings. */
+export const PRIVACY_TEXT = {
+  discord: { title: "Show what I'm listening to on Discord", hint: 'The song, artist and cover appear on your Discord profile for your friends to see' },
+  lyrics: { title: 'Online lyrics', hint: 'Looks up lyrics on lrclib.net, which receives the song title and artist (nothing about you)' },
+  updates: { title: 'Automatic updates', hint: 'Checks GitHub for new versions and installs them when you quit. Recommended: updates carry security fixes' },
+}
+
+/**
+ * First-run consent. Shown until answered, before the welcome tour. Until then nothing is sent
+ * to Discord, lrclib.net or GitHub (main enforces this too, not just this screen).
+ */
+export function Privacy() {
+  const s = useUi((x) => x.settings)
+  const [discord, setDiscord] = useState(false)
+  const [onlineLyrics, setLyrics] = useState(s.privacy.onlineLyrics)
+  const [updateChecks, setUpdates] = useState(s.privacy.updateChecks)
+  const done = () => {
+    updateSettings('discord', { enabled: discord })
+    updateSettings('privacy', { consented: true, onlineLyrics, updateChecks })
+    if (!getState().settings.onboarding.done) setState({ welcome: true })
+  }
+  return (
+    <div class="modal-backdrop">
+      <div class="modal privacy" role="dialog" aria-modal="true" aria-label="Your privacy">
+        <div class="welcome-head">
+          <span class="welcome-badge"><Icon name="lock" size={22} /></span>
+          <div>
+            <h2>Your privacy</h2>
+            <p>
+              YouputDesk has no accounts, analytics or tracking, and no servers of its own. Your Google sign-in goes
+              only to Google and is stored encrypted on this PC. These optional features talk to other services:
+            </p>
+          </div>
+        </div>
+        <Section title="Choose what to turn on">
+          <Row icon="chat" title={PRIVACY_TEXT.discord.title} hint={PRIVACY_TEXT.discord.hint}>
+            <Switch checked={discord} label={PRIVACY_TEXT.discord.title} onChange={setDiscord} />
+          </Row>
+          <Row icon="lyrics" title={PRIVACY_TEXT.lyrics.title} hint={PRIVACY_TEXT.lyrics.hint}>
+            <Switch checked={onlineLyrics} label={PRIVACY_TEXT.lyrics.title} onChange={setLyrics} />
+          </Row>
+          <Row icon="reset" title={PRIVACY_TEXT.updates.title} hint={PRIVACY_TEXT.updates.hint}>
+            <Switch checked={updateChecks} label={PRIVACY_TEXT.updates.title} onChange={setUpdates} />
+          </Row>
+        </Section>
+        <div class="modal-foot">
+          <span class="hint">Change these anytime in Settings → Privacy.</span>
+          <Button primary onClick={done}>Continue</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const FEATURES: { icon: IconName; title: string; text: string; panel?: Panel; action: keyof typeof ACTIONS }[] = [
   { icon: 'eq', title: 'Equalizer', text: '10 bands, presets, bass boost and a limiter so boosts never distort.', panel: 'eq', action: 'openEqualizer' },

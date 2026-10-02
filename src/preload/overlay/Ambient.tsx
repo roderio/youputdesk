@@ -1,6 +1,8 @@
 /** Lightweight UI that floats over the page: the ad banner and toasts. */
+import { useEffect, useState } from 'preact/hooks'
+import { prettyAccelerator } from '../../shared/shortcuts'
 import { runAction } from '../actions'
-import { useUi } from '../store'
+import { getState, useUi } from '../store'
 import { Icon } from './icons'
 import { Keys } from './ui'
 
@@ -26,6 +28,38 @@ export function AdBanner() {
         </span>
       )}
     </div>
+  )
+}
+
+/**
+ * Visually hidden live regions for screen readers (NVDA, Narrator): song changes are announced
+ * politely, a skippable ad assertively.
+ */
+export function Announcer() {
+  const enabled = useUi((s) => s.settings.accessibility.announce)
+  const songId = useUi((s) => (s.player && !s.player.ad ? s.player.videoId : ''))
+  const skippable = useUi((s) => s.ad.active && s.ad.skippable)
+  const keys = useUi((s) => s.settings.shortcuts.skipAd.accelerator)
+  const [polite, setPolite] = useState('')
+  const [urgent, setUrgent] = useState('')
+
+  useEffect(() => {
+    const p = getState().player
+    if (!enabled || !songId || !p) return
+    setPolite(`Now playing: ${p.title}${p.artist ? ` by ${p.artist}` : ''}`)
+  }, [songId, enabled])
+
+  useEffect(() => {
+    if (!enabled || !skippable) return setUrgent('')
+    const k = prettyAccelerator(keys).join(' ')
+    setUrgent(k ? `Ad can be skipped. Press ${k}.` : 'Ad can be skipped.')
+  }, [skippable, enabled])
+
+  return (
+    <>
+      <div class="sr-only" role="status" aria-live="polite">{polite}</div>
+      <div class="sr-only" aria-live="assertive">{urgent}</div>
+    </>
   )
 }
 

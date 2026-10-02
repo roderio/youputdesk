@@ -1,8 +1,9 @@
-import { BrowserWindow, screen, shell } from 'electron'
+import { BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { PARTITION, YTM_URL } from '../shared/config'
 import { openSignIn } from './auth'
-import { ctx } from './context'
+import { asset, ctx, isOnScreen } from './context'
+import { openExternal } from './external'
 import { isGoogleSignIn, isMainAllowed } from './navigation'
 import { store } from './store'
 import { setupTaskbar } from './taskbar'
@@ -11,11 +12,7 @@ import { showTrayBalloon } from './tray'
 /** Saved bounds, or undefined if they no longer fit on any connected display. */
 function restoredBounds() {
   const bounds = store.get('window.bounds')
-  if (!bounds) return undefined
-  const visible = screen.getAllDisplays().some(({ workArea: a }) =>
-    bounds.x < a.x + a.width && bounds.x + bounds.width > a.x && bounds.y < a.y + a.height && bounds.y + bounds.height > a.y,
-  )
-  return visible ? bounds : undefined
+  return bounds && isOnScreen(bounds) ? bounds : undefined
 }
 
 export function createMainWindow(): BrowserWindow {
@@ -28,6 +25,8 @@ export function createMainWindow(): BrowserWindow {
     show: false,
     backgroundColor: '#030303',
     title: 'YouputDesk',
+    // Same design as the tray icon.
+    icon: asset('icon.ico'),
     autoHideMenuBar: true,
     webPreferences: {
       partition: PARTITION,
@@ -79,7 +78,7 @@ export function createMainWindow(): BrowserWindow {
       return false
     }
     if (isMainAllowed(url)) return true
-    shell.openExternal(url)
+    openExternal(url)
     return false
   }
 

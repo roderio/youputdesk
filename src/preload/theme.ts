@@ -15,6 +15,16 @@ export function accentOf(s: UiState): string {
   return theme.original ? '#ff4e45' : theme.accent
 }
 
+/** Accessibility extras for YouTube Music's own page: an unmistakable keyboard focus ring. */
+const HIGH_CONTRAST_CSS = `
+:focus-visible, a:focus-visible, button:focus-visible, tp-yt-paper-icon-button:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #ffd400 !important; outline-offset: 2px !important; box-shadow: 0 0 0 5px #000 !important;
+}
+`
+const REDUCE_MOTION_CSS = `
+*, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+`
+
 export function setupTheme(): void {
   const style = document.createElement('style')
   style.id = 'youputdesk-theme'
@@ -24,7 +34,8 @@ export function setupTheme(): void {
     const s = getState()
     const theme = activeTheme(s)
     const art = s.settings.theme.artBackground && !s.settings.ui.performanceMode && s.player?.artwork
-    const css = themeCss(theme, theme.dynamic ? s.palette : null) + (art ? artBackgroundCss(art) : '')
+    const css = themeCss(theme, theme.dynamic ? s.palette : null) + (art ? artBackgroundCss(art) : '') +
+      (s.settings.accessibility.highContrast ? HIGH_CONTRAST_CSS : '') + (s.settings.accessibility.reduceMotion ? REDUCE_MOTION_CSS : '')
     if (css === last) return
     last = css
     style.textContent = css

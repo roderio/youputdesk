@@ -1,9 +1,14 @@
-/** Mini player: a small always-on-top card that pops up above the tray icon. */
+/**
+ * Mini player: a small always-on-top card that pops up above the tray icon. Drag it anywhere and
+ * it stays there (across restarts) as a floating widget; pinned or moved, it no longer hides when
+ * you click elsewhere.
+ */
 import { BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'node:path'
-import { IPC } from '../shared/ipc'
-import { sendAction, showMainWindow } from './context'
+import { IPC, type MiniPrefs } from '../shared/ipc'
+import { isOnScreen, sendAction, showMainWindow } from './context'
 import { player } from './player'
+import { store } from './store'
 
 const WIDTH = 360
 const HEIGHT = 150
@@ -18,7 +23,16 @@ export function setMiniAnchor(bounds: Electron.Rectangle): void {
   anchor = bounds
 }
 
-function position(win: BrowserWindow): void {
+/** The position the user dragged the card to, if it's still on a connected display. */
+function savedPosition(): { x: number; y: number } | undefined {
+  const p = store.get('mini.position')
+  return p && isOnScreen({ ...p, width: WIDTH, height: HEIGHT }) ? p : undefined
+}
+
+/** Moved somewhere by the user or pinned: behave like a widget and stay open on click-away. */
+const floating = (): boolean => store.get('mini.pinned') || !!savedPosition()
+
+function trayPosition(win: BrowserWindow): void {
   const point = anchor ? { x: anchor.x + anchor.width / 2, y: anchor.y } : screen.getCursorScreenPoint()
   const { workArea: a } = screen.getDisplayNearestPoint(point)
   const x = Math.round(Math.min(Math.max(point.x - WIDTH / 2, a.x + 8), a.x + a.width - WIDTH - 8))
@@ -26,6 +40,14 @@ function position(win: BrowserWindow): void {
   const y = point.y >= a.y + a.height / 2 ? a.y + a.height - HEIGHT - 8 : a.y + 8
   win.setPosition(x, y)
 }
+
+function position(win: BrowserWindow): void {
+  const saved = savedPosition()
+  if (saved) win.setPosition(saved.x, saved.y)
+  else trayPosition(win)
+}
+
+const prefs = (): MiniPrefs => ({ pinned: store.get('mini.pinned'), reduceMotion: store.get('accessibility.reduceMotion') })
 
 function create(): BrowserWindow {
   const win = new BrowserWindow({
@@ -50,10 +72,17 @@ function create(): BrowserWindow {
   })
   win.on('blur', () => {
     // Clicking the tray icon blurs then re-toggles; let that click close it instead of reopening.
-    if (!win.webContents.isDevToolsOpened()) win.hide()
+    if (!floating() && !win.webContents.isDevToolsOpened()) win.hide()
+  })
+  // Fired when the user finishes dragging the card (not for our own setPosition calls).
+  win.on('moved', () => {
+    const [x, y] = win.getPosition()
+    store.set('mini.position', { x, y })
   })
   win.on('hide', () => (lastHidden = Date.now()))
   win.on('closed', () => (mini = null))
+  // A local page: it never navigates anywhere.
+  win.webContents.on('will-navigate', (e) => e.preventDefault())
 
   if (process.env.ELECTRON_RENDERER_URL) win.loadURL(`${process.env.ELECTRON_RENDERER_URL}/mini/index.html`)
   else win.loadFile(join(import.meta.dirname, '../renderer/mini/index.html'))
@@ -73,16 +102,26 @@ export function toggleMiniPlayer(): void {
   const showIt = () => {
     win.show()
     win.focus()
+    win.webContents.send(IPC.miniPrefs, prefs())
     win.webContents.send(IPC.miniState, player.state)
   }
   if (win.webContents.isLoading()) win.webContents.once('did-finish-load', showIt)
   else showIt()
 }
 
+/** Forget the dragged position: the card goes back to popping up above the tray. */
+export function resetMiniPosition(): void {
+  store.delete('mini.position')
+  if (mini?.isVisible()) trayPosition(mini)
+}
+
 export function setupMiniPlayer(): void {
   player.on('state', (s) => {
     if (mini?.isVisible()) mini.webContents.send(IPC.miniState, s)
   })
+  const pushPrefs = () => mini?.webContents.send(IPC.miniPrefs, prefs())
+  store.onDidChange('mini', pushPrefs)
+  store.onDidChange('accessibility', pushPrefs)
   ipcMain.on(IPC.miniCommand, (e, cmd: unknown) => {
     if (!mini || e.sender !== mini.webContents) return
     if (cmd === 'open') {
@@ -90,6 +129,8 @@ export function setupMiniPlayer(): void {
       showMainWindow()
     } else if (cmd === 'close') {
       mini.hide()
+    } else if (cmd === 'pin') {
+      store.set('mini.pinned', !store.get('mini.pinned'))
     } else if (typeof cmd === 'object' && cmd && 'seek' in cmd) {
       const fraction = Number((cmd as { seek: unknown }).seek)
       if (Number.isFinite(fraction) && player.state) sendAction('seekTo', fraction * player.state.duration)
@@ -98,4 +139,3 @@ export function setupMiniPlayer(): void {
     }
   })
 }
-

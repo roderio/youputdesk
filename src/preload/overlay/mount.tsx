@@ -8,11 +8,11 @@ import { SEL } from '../../shared/selectors'
 import { registerClickThrough } from '../ads'
 import { getState, setState, subscribe, useUi } from '../store'
 import { accentOf } from '../theme'
-import { AdBanner, Toasts } from './Ambient'
+import { AdBanner, Announcer, Toasts } from './Ambient'
 import { EqPanel } from './EqPanel'
 import { Icon } from './icons'
 import { FullLyrics, LyricsPanel } from './Lyrics'
-import { CheatSheet, Welcome } from './Modals'
+import { CheatSheet, Privacy, Welcome } from './Modals'
 import { SettingsPanel } from './SettingsPanel'
 import { ShortcutsPanel } from './ShortcutsPanel'
 import { ThemesPanel } from './ThemesPanel'
@@ -54,14 +54,16 @@ function Overlay() {
   const fullLyrics = useUi((s) => s.fullLyrics)
   const cheatSheet = useUi((s) => s.cheatSheet)
   const welcome = useUi((s) => s.welcome)
+  const consented = useUi((s) => s.settings.privacy.consented)
   return (
     <>
       <AdBanner />
       <Drawer />
       {fullLyrics && <FullLyrics />}
       {cheatSheet && <CheatSheet />}
-      {welcome && <Welcome />}
+      {consented ? welcome && <Welcome /> : <Privacy />}
       <Toasts />
+      <Announcer />
     </>
   )
 }
@@ -86,11 +88,13 @@ function makeRoot(tag: string, hostStyle: string): ShadowRoot {
   const sheet = new CSSStyleSheet()
   sheet.replaceSync(STYLES)
   shadow.adoptedStyleSheets = [sheet]
-  // Theme accent and performance mode reach the shadow DOM through the host element.
+  // Theme accent, performance mode and accessibility options reach the shadow DOM through the host element.
   const sync = () => {
     const s = getState()
     host.style.setProperty('--accent', accentOf(s))
     host.classList.toggle('perf', s.settings.ui.performanceMode)
+    host.classList.toggle('hc', s.settings.accessibility.highContrast)
+    host.classList.toggle('rm', s.settings.accessibility.reduceMotion)
   }
   sync()
   subscribe(sync)

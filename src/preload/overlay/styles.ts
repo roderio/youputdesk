@@ -26,6 +26,18 @@ export const STYLES = /* css */ `
 :host(.perf) *, :host(.perf) *::before, :host(.perf) *::after {
   transition: none !important; animation: none !important; backdrop-filter: none !important;
 }
+:host(.rm) *, :host(.rm) *::before, :host(.rm) *::after { transition: none !important; animation: none !important; }
+/* High contrast: brighter secondary text, solid surfaces, visible edges and a bold focus ring. */
+:host(.hc) {
+  --bg: #000; --bg-solid: #000; --raise: #1c1c1c; --raise-2: #2a2a2a;
+  --line: rgba(255, 255, 255, 0.55); --muted: rgba(255, 255, 255, 0.92); --faint: rgba(255, 255, 255, 0.75);
+}
+:host(.hc) .switch, :host(.hc) .btn, :host(.hc) .chip, :host(.hc) .select, :host(.hc) .text { border: 2px solid rgba(255, 255, 255, 0.8); }
+:host(.hc) .switch .knob { top: 1px; left: 1px; }
+:host(.hc) button:focus-visible, :host(.hc) input:focus-visible, :host(.hc) select:focus-visible, :host(.hc) textarea:focus-visible, :host(.hc) [tabindex]:focus-visible {
+  outline: 3px solid #ffd400; outline-offset: 3px; box-shadow: 0 0 0 6px #000;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 * { box-sizing: border-box; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
@@ -255,6 +267,7 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 6px; border-radius: 6px; backgr
 .modal h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
 .modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
 .hint { color: var(--muted); font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.modal.privacy { width: min(600px, 100%); }
 .welcome-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 22px; }
 .welcome-head p { color: var(--muted); margin-top: 4px; }
 .welcome-badge { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #0b0b0b; background: linear-gradient(135deg, var(--accent), #7c4dff); }

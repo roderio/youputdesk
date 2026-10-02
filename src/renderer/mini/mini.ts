@@ -54,6 +54,13 @@ function frame(): void {
 }
 
 window.mini.onState(render)
+window.mini.onPrefs((p) => {
+  const pin = $('pin')
+  pin.classList.toggle('on', p.pinned)
+  pin.setAttribute('aria-pressed', String(p.pinned))
+  pin.title = p.pinned ? 'Keep open: on' : 'Keep open'
+  document.documentElement.classList.toggle('reduce-motion', p.reduceMotion)
+})
 requestAnimationFrame(frame)
 
 const bind = (id: string, cmd: Parameters<MiniApi['command']>[0]) => $(id).addEventListener('click', () => window.mini.command(cmd))
@@ -70,6 +77,7 @@ $('shuffle').addEventListener('click', () => {
 bind('repeat', 'repeat')
 bind('open', 'open')
 bind('close', 'close')
+bind('pin', 'pin')
 
 $('progress').addEventListener('click', (e) => {
   const r = $('progress').getBoundingClientRect()
