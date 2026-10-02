@@ -61,7 +61,7 @@ export interface Settings {
     consented: boolean
     /** Look up lyrics on lrclib.net (sends the song title and artist). */
     onlineLyrics: boolean
-    /** Check GitHub for new versions and install them on quit. */
+    /** Check GitHub for new versions, download them in the background and install them at launch. */
     updateChecks: boolean
   }
 }

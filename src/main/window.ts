@@ -15,7 +15,25 @@ function restoredBounds() {
   return bounds && isOnScreen(bounds) ? bounds : undefined
 }
 
-export function createMainWindow(): BrowserWindow {
+// With the updater window up at launch, the main window loads hidden and appears once both it
+// and the update check are done.
+let ready = false
+let released = true
+
+// maximize() on a hidden window shows it on Windows, so it waits until the window may appear.
+function present(win: BrowserWindow): void {
+  if (store.get('window.maximized')) win.maximize()
+  win.show()
+}
+
+/** Lets a deferred main window appear: right away if it has loaded, else as soon as it has. */
+export function revealMainWindow(): void {
+  released = true
+  if (ready && ctx.main) present(ctx.main)
+}
+
+export function createMainWindow(opts: { deferShow?: boolean } = {}): BrowserWindow {
+  released = !opts.deferShow
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -41,8 +59,10 @@ export function createMainWindow(): BrowserWindow {
     },
   })
 
-  if (store.get('window.maximized')) win.maximize()
-  win.once('ready-to-show', () => win.show())
+  win.once('ready-to-show', () => {
+    ready = true
+    if (released) present(win)
+  })
 
   let saveTimer: NodeJS.Timeout | undefined
   const saveBounds = () => {

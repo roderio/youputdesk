@@ -10,11 +10,12 @@ import { setupNotifications } from './notifications'
 import { setupPalette } from './palette'
 import { setupSecurity } from './security'
 import { setupShortcuts, teardownShortcuts } from './shortcuts'
+import { focusSplash, isSplashOpen, setupSplash } from './splash'
 import { store, type Identity } from './store'
 import { setupTray } from './tray'
 import { applyIdentity, setupIdentity } from './ua'
-import { checkForUpdatesNow, setupUpdater } from './updater'
-import { createMainWindow } from './window'
+import { checkForUpdatesNow, runLaunchUpdate, setupUpdater, updatesEnabled } from './updater'
+import { createMainWindow, revealMainWindow } from './window'
 
 // Toasts need an app identity on Windows. The installer registers this one; in development
 // Windows only shows toasts for the running executable's path.
@@ -71,21 +72,26 @@ setupSecurity()
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', showMainWindow)
+  // While the updater window is up, the app isn't ready to show yet.
+  app.on('second-instance', () => (isSplashOpen() ? focusSplash() : showMainWindow()))
 
   app.whenReady().then(() => {
     setupIdentity()
     buildMenu()
     setupIpc()
-    ctx.main = createMainWindow()
+    setupSplash()
+    setupUpdater()
+    // With updates on, check behind the updater window while YouTube Music loads hidden.
+    const launchUpdate = updatesEnabled()
+    ctx.main = createMainWindow({ deferShow: launchUpdate })
     ctx.main.on('closed', () => (ctx.main = null))
+    if (launchUpdate) runLaunchUpdate(revealMainWindow)
     setupTray()
     setupMiniPlayer()
     setupShortcuts()
     setupNotifications()
     setupPalette()
     setupDiscord()
-    setupUpdater()
   })
 
   app.on('before-quit', () => (ctx.quitting = true))

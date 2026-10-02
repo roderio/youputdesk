@@ -72,8 +72,8 @@ Debugging the overlay: open DevTools (`Alt` → App → Toggle Developer Tools),
 1. `npm version patch` (or `minor`/`major`): bumps `package.json` and creates the `vX.Y.Z` tag.
 2. `git push --follow-tags`: GitHub Actions (`.github/workflows/release.yml`) tests, builds and uploads the
    installer, the portable exes and `latest.yml` (the auto-update feed) to a **draft** release.
-3. Check the draft on GitHub, add release notes, and click **Publish**. Installed copies pick it up within six
-   hours and install it when the app is next quit.
+3. Check the draft on GitHub, add release notes, and click **Publish**. Installed copies pick it up at their next
+   launch, or download it in the background within six hours and install it at the launch after that.
 
 Releases are only ever built by CI. Keep 2FA on the GitHub account and protect the `main` branch and `v*` tags,
 because anyone who can publish a release can ship an update.

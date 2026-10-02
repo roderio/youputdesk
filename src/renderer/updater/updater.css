@@ -1,0 +1,103 @@
+:root {
+  --accent: #ff4e45;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  color: #f4f4f6;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; user-select: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+.card {
+  position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; border-radius: 18px; overflow: hidden; isolation: isolate; text-align: center;
+  background: rgba(22, 22, 27, 0.94); border: 1px solid rgba(255, 255, 255, 0.09);
+  animation: in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Drag the card anywhere; the skip link stays clickable. */
+  -webkit-app-region: drag;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.skip { -webkit-app-region: no-drag; }
+@keyframes in { from { opacity: 0; transform: scale(0.96); } }
+.card.done { opacity: 0; transform: scale(0.96); }
+/* Soft accent glow behind the bars */
+.card::before {
+  content: ""; position: absolute; left: 50%; top: 28%; width: 240px; height: 170px; z-index: -1;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 78, 69, 0.28), transparent);
+}
+
+/* Equalizer bars: the app's "logo" while updating */
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 72px; margin-bottom: 18px; }
+.bars span {
+  width: 9px; height: 100%; border-radius: 5px; background: linear-gradient(to top, var(--accent), #ff9a62);
+  transform-origin: bottom; transform: scaleY(0.25);
+  animation: eq 900ms ease-in-out infinite alternate;
+}
+.bars span:nth-child(1) { animation-duration: 820ms; animation-delay: -120ms; }
+.bars span:nth-child(2) { animation-duration: 640ms; animation-delay: -400ms; }
+.bars span:nth-child(3) { animation-duration: 980ms; animation-delay: -260ms; }
+.bars span:nth-child(4) { animation-duration: 700ms; animation-delay: -560ms; }
+.bars span:nth-child(5) { animation-duration: 880ms; animation-delay: -80ms; }
+.bars span:nth-child(6) { animation-duration: 600ms; animation-delay: -330ms; }
+.bars span:nth-child(7) { animation-duration: 760ms; animation-delay: -480ms; }
+@keyframes eq {
+  0% { transform: scaleY(0.2); }
+  50% { transform: scaleY(0.7); }
+  100% { transform: scaleY(0.4); }
+}
+/* Downloading: the music gets livelier */
+.downloading .bars span { animation-name: eq-loud; }
+@keyframes eq-loud {
+  0% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.55); }
+}
+/* Installing: every bar lines up and pulses together */
+.installing .bars span { animation: pulse 700ms ease-in-out infinite alternate; }
+@keyframes pulse {
+  from { transform: scaleY(0.8); opacity: 0.75; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+.name { font-weight: 700; font-size: 18px; letter-spacing: 0.2px; }
+.status { margin-top: 6px; font-size: 13px; color: rgba(255, 255, 255, 0.78); min-height: 18px; }
+.quip {
+  margin-top: 2px; font-size: 12px; color: rgba(255, 255, 255, 0.5); min-height: 16px;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.quip.out { opacity: 0; transform: translateY(4px); }
+
+.progress {
+  position: relative; width: 200px; height: 4px; margin-top: 16px; border-radius: 4px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.14); opacity: 0; transition: opacity 200ms ease;
+}
+.downloading .progress, .installing .progress { opacity: 1; }
+.fill {
+  position: absolute; inset: 0; border-radius: 4px; background: var(--accent);
+  transform-origin: left; transform: scaleX(0); transition: transform 300ms ease-out;
+}
+/* Installing reports no progress: a light sweeps across the full bar instead */
+.installing .fill { transform: scaleX(1) !important; }
+.installing .fill::after {
+  content: ""; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: sweep 1100ms ease-in-out infinite;
+}
+@keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
+.detail { margin-top: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.45); font-variant-numeric: tabular-nums; min-height: 15px; }
+
+.skip {
+  margin-top: 10px; font-size: 12px; color: rgba(255, 255, 255, 0.6); text-decoration: underline; text-underline-offset: 2px;
+  opacity: 0; visibility: hidden; transition: opacity 300ms ease, visibility 300ms;
+}
+.skip.shown { opacity: 1; visibility: visible; }
+.skip:hover { color: #fff; }
+.skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* Reduce motion / performance mode: still bars, no sweep, no rotating lines */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; }
+.reduce-motion .bars span { transform: scaleY(0.6); }
+.reduce-motion .bars span:nth-child(even) { transform: scaleY(0.85); }
+.reduce-motion .quip { display: none; }

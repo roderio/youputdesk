@@ -11,7 +11,7 @@ export default defineConfig({
     esbuild: jsx,
     build: {
       // Sandboxed preloads can only require('electron'): each must be one self-contained file.
-      // So bundle dependencies in, and keep the small preloads (mini, auth-compat) free of runtime
+      // So bundle dependencies in, and keep the small preloads (mini, updater, auth-compat) free of runtime
       // imports shared with index, or Rollup would split the shared code into a chunk file.
       externalizeDeps: false,
       rollupOptions: {
@@ -19,6 +19,7 @@ export default defineConfig({
           index: resolve('src/preload/index.ts'),
           'auth-compat': resolve('src/preload/auth-compat.ts'),
           mini: resolve('src/preload/mini.ts'),
+          updater: resolve('src/preload/updater.ts'),
         },
         // Sandboxed preloads must be CommonJS.
         output: { format: 'cjs', entryFileNames: '[name].cjs' },
@@ -29,7 +30,10 @@ export default defineConfig({
     root: 'src/renderer',
     build: {
       rollupOptions: {
-        input: { mini: resolve('src/renderer/mini/index.html') },
+        input: {
+          mini: resolve('src/renderer/mini/index.html'),
+          updater: resolve('src/renderer/updater/index.html'),
+        },
       },
     },
   },

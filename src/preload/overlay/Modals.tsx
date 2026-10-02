@@ -8,7 +8,7 @@ import { Button, IconButton, Keys, Row, Section, Switch } from './ui'
 export const PRIVACY_TEXT = {
   discord: { title: "Show what I'm listening to on Discord", hint: 'The song, artist and cover appear on your Discord profile for your friends to see' },
   lyrics: { title: 'Online lyrics', hint: 'Looks up lyrics on lrclib.net, which receives the song title and artist (nothing about you)' },
-  updates: { title: 'Automatic updates', hint: 'Checks GitHub for new versions and installs them when you quit. Recommended: updates carry security fixes' },
+  updates: { title: 'Automatic updates', hint: 'Checks GitHub for new versions and installs them when you open the app. Recommended: updates carry security fixes' },
 }
 
 /**

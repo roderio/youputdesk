@@ -40,8 +40,13 @@ export function showTestNotification(): void {
 }
 
 /** A downloaded update. Shown even with the window focused: it's a one-off and there's no in-page banner for it. */
-export function showUpdateReady(version: string): void {
-  show('Update ready', `YouputDesk ${version} installs when you quit.`, showMainWindow)
+export function showUpdateReady(version: string, onClick: () => void): void {
+  show('Update ready', `YouputDesk ${version} installs next time you open the app. Click to restart now.`, onClick)
+}
+
+/** After "Check for updates" found one; we ask about restarting once it's downloaded. */
+export function showUpdateDownloading(version: string): void {
+  show('Downloading update', `YouputDesk ${version} is downloading. We'll let you know when it's ready.`, showMainWindow)
 }
 
 export function setupNotifications(): void {

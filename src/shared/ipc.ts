@@ -55,6 +55,18 @@ export interface MiniPrefs {
   reduceMotion: boolean
 }
 
+/** Updater window state, pushed by main. */
+export interface UpdateStatus {
+  phase: 'checking' | 'downloading' | 'installing' | 'done'
+  version?: string
+  /** 0–100 */
+  percent?: number
+  transferred?: number
+  total?: number
+  bytesPerSecond?: number
+  reduceMotion: boolean
+}
+
 export const IPC = {
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
@@ -76,4 +88,7 @@ export const IPC = {
   miniState: 'mini:state',
   miniCommand: 'mini:command',
   miniPrefs: 'mini:prefs',
+  /** updater window ↔ main */
+  updaterStatus: 'updater:status',
+  updaterCommand: 'updater:command',
 } as const

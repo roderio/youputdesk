@@ -3,8 +3,19 @@ import { app, Menu, Tray } from 'electron'
 import { assetImage, ctx, sendAction, showMainWindow } from './context'
 import { setMiniAnchor, toggleMiniPlayer } from './mini'
 import { player } from './player'
+import { canUpdate, checkForUpdatesNow, pendingUpdate, restartToUpdate } from './updater'
 
 let tray: Tray | null = null
+
+function updateItems(): Electron.MenuItemConstructorOptions[] {
+  // Portable and dev builds don't update; the App menu's item explains that.
+  if (!canUpdate()) return []
+  const pending = pendingUpdate()
+  return [
+    pending ? { label: `Restart to update (${pending})`, click: restartToUpdate } : { label: 'Check for updates', click: () => void checkForUpdatesNow() },
+    { type: 'separator' },
+  ]
+}
 
 function buildMenu(): Menu {
   const s = player.state
@@ -20,6 +31,7 @@ function buildMenu(): Menu {
     { label: 'Mini player', click: toggleMiniPlayer },
     { label: 'Show YouputDesk', click: showMainWindow },
     { type: 'separator' },
+    ...updateItems(),
     {
       label: 'Quit',
       click: () => {

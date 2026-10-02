@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+    <title>YouputDesk</title>
+    <link rel="stylesheet" href="./updater.css" />
+  </head>
+  <body>
+    <main class="card checking" id="card" aria-label="YouputDesk updater">
+      <div class="bars" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="name">YouputDesk</div>
+      <div class="status" id="status" role="status" aria-live="polite">Checking for updates…</div>
+      <div class="quip" id="quip"></div>
+      <div class="progress" id="progress" aria-hidden="true"><div class="fill" id="fill"></div></div>
+      <div class="detail" id="detail"></div>
+      <button class="skip" id="skip" type="button">Skip for now</button>
+    </main>
+    <script type="module" src="./updater.ts"></script>
+  </body>
+</html>
