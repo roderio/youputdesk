@@ -30,7 +30,7 @@
     "@xhayper/discord-rpc": "^1.5.1",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.8.9",
-    "preact": "^10.29.8"
+    "preact": "^11.0.0"
   },
   "allowScripts": {
     "esbuild@0.25.12": true,
