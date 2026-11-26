@@ -6,7 +6,9 @@ import type { Theme } from './themes'
 /** How we present ourselves to Google during sign-in. See main/ua.ts. */
 export type Identity = 'native' | 'chrome' | 'firefox'
 
-export interface Settings {
+// A type alias rather than an interface: electron-store 12 types `defaults` with an index signature for
+// dot-notation keys (from Record fields such as eq.custom), and only type aliases are assignable to that.
+export type Settings = {
   window: { bounds?: Rectangle; maximized: boolean }
   auth: { identity: Identity }
   eq: {
