@@ -1,11 +1,20 @@
-# When a release is published, opens a pull request at microsoft/winget-pkgs that adds the new
-# version, so `winget upgrade` picks it up. Needs a WINGET_TOKEN secret: a classic personal access
-# token with the public_repo scope (it pushes to the roderio/winget-pkgs fork).
+# Opens a pull request at microsoft/winget-pkgs that adds a new version, so `winget upgrade` picks it
+# up. Needs a WINGET_TOKEN secret: a classic personal access token with the public_repo scope (it
+# pushes to the roderio/winget-pkgs fork).
+#
+# Manual for now: this action can only update a package that already exists in winget-pkgs, and
+# roderio.YouputDesk is still waiting for its first version to be accepted. Once it is, add back
+#   release:
+#     types: [released]
+# under `on:` so every published release is submitted automatically.
 name: Publish to WinGet
 
 on:
-  release:
-    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to submit, e.g. v0.2.2
+        required: true
 
 permissions:
   contents: read
@@ -17,6 +26,7 @@ jobs:
       - uses: vedantmgoyal9/winget-releaser@b7370d4d152efdce803a26cc6ca9eee58cb2ad54 # v2
         with:
           identifier: roderio.YouputDesk
+          release-tag: ${{ inputs.tag || github.event.release.tag_name }}
           # Only the installer: the portable exes aren't installable packages.
           installers-regex: 'YouputDesk-Setup-.*\.exe$'
           token: ${{ secrets.WINGET_TOKEN }}
