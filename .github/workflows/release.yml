@@ -22,6 +22,8 @@ jobs:
       - run: npm ci
       - name: Fail on known vulnerabilities in shipped dependencies
         run: npm audit --omit=dev --audit-level=high
+      - name: Fail on known high-severity advisories in Electron (a devDependency, but shipped)
+        run: node scripts/audit-electron.mjs
       - name: Tag matches package.json version
         shell: bash
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
