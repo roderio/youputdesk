@@ -1,20 +1,17 @@
 import { resolve } from 'node:path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-
-const jsx = { jsx: 'automatic', jsxImportSource: 'preact' } as const
+import { defineConfig } from 'electron-vite'
 
 export default defineConfig({
-  main: {
-    plugins: [externalizeDepsPlugin()],
-  },
+  // Dependencies stay external (build.externalizeDeps defaults to true): Electron loads them from node_modules.
+  main: {},
   preload: {
-    esbuild: jsx,
+    oxc: { jsx: { runtime: 'automatic', importSource: 'preact' } },
     build: {
       // Sandboxed preloads can only require('electron'): each must be one self-contained file.
       // So bundle dependencies in, and keep the small preloads (mini, updater, auth-compat) free of runtime
-      // imports shared with index, or Rollup would split the shared code into a chunk file.
+      // imports shared with index, or Rolldown would split the shared code into a chunk file.
       externalizeDeps: false,
-      rollupOptions: {
+      rolldownOptions: {
         input: {
           index: resolve('src/preload/index.ts'),
           'auth-compat': resolve('src/preload/auth-compat.ts'),
@@ -29,7 +26,7 @@ export default defineConfig({
   renderer: {
     root: 'src/renderer',
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         input: {
           mini: resolve('src/renderer/mini/index.html'),
           updater: resolve('src/renderer/updater/index.html'),

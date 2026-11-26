@@ -22,9 +22,9 @@
     "@types/node": "^26.6.11",
     "electron": "^44.11.6",
     "electron-builder": "^26.18.0",
-    "electron-vite": "^5.0.0",
+    "electron-vite": "^6.0.0",
     "typescript": "^7.0.2",
-    "vite": "^7.3.8",
+    "vite": "^8.4.0",
     "vitest": "^5.1.2"
   },
   "dependencies": {
