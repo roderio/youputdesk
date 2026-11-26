@@ -3,7 +3,7 @@
 Drafts for announcing YouputDesk. Not linked from the website. Post them from your own accounts.
 
 **Before posting:** screenshots and the demo GIF are in `docs/screenshots/`, the website is live, and
-`winget install roderio.YouputDesk` works (PR #445420 merged). Then post to one or two places a day, and stay
+`winget install roderio.YouputDesk` works ([PR #490360](https://github.com/microsoft/winget-pkgs/pull/490360) merged). Then post to one or two places a day, and stay
 around for a few hours afterwards to answer comments and fix the bugs people find.
 
 | File | Where | Notes |

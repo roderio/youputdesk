@@ -118,9 +118,9 @@
           Click <b>More info</b>, then <b>Run anyway</b>.</p>
       </div>
       <div class="panel" role="tabpanel" id="panel-winget" aria-labelledby="tab-winget" hidden>
-        <p>In PowerShell or Terminal:</p>
-        <pre><code>winget install roderio.YouputDesk</code><button class="copy" type="button">Copy</button></pre>
-        <p class="note">Update later with <code>winget upgrade roderio.YouputDesk</code>, or let the app update itself.</p>
+        <p>Coming soon. The winget package is <a href="https://github.com/microsoft/winget-pkgs/pull/490360">waiting for approval</a>.
+          Until then, use the installer or Scoop.</p>
+        <p class="note">Once it's in, you'll be able to run <code>winget install roderio.YouputDesk</code>.</p>
       </div>
       <div class="panel" role="tabpanel" id="panel-scoop" aria-labelledby="tab-scoop" hidden>
         <p>In PowerShell:</p>
@@ -140,7 +140,7 @@ scoop install youputdesk</code><button class="copy" type="button">Copy</button><
         <summary>Is it safe? Windows warned me about it.</summary>
         <p>The installer isn't code-signed yet, so SmartScreen doesn't recognize it. Every release is built by GitHub Actions
           from the <a href="https://github.com/roderio/youputdesk">public source code</a>, and signing through the SignPath
-          Foundation is on the way. Installing with winget or Scoop skips the warning.</p>
+          Foundation is on the way. Installing with Scoop skips the warning.</p>
       </details>
       <details>
         <summary>Does YouTube Music Premium work?</summary>

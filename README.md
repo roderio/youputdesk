@@ -8,7 +8,6 @@
 
 [![Latest release](https://img.shields.io/github/v/release/roderio/youputdesk?label=release)](https://github.com/roderio/youputdesk/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/roderio/youputdesk/total)](https://github.com/roderio/youputdesk/releases)
-[![winget](https://img.shields.io/winget/v/roderio.YouputDesk?label=winget)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/r/roderio/YouputDesk)
 [![CI](https://github.com/roderio/youputdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/roderio/youputdesk/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/github/license/roderio/youputdesk)](LICENSE)
 
@@ -45,12 +44,6 @@ Pick whichever you like. All of them work on Windows 10 and 11, on both Intel/AM
 [latest release](https://github.com/roderio/youputdesk/releases/latest) and open it. It installs in a few
 seconds without admin rights and updates itself.
 
-**winget:**
-
-```powershell
-winget install roderio.YouputDesk
-```
-
 **Scoop:**
 
 ```powershell
@@ -58,12 +51,16 @@ scoop bucket add roderio https://github.com/roderio/scoop-bucket
 scoop install youputdesk
 ```
 
+**winget:** coming soon. The package is
+[waiting for approval](https://github.com/microsoft/winget-pkgs/pull/490360); once it's in, you'll be able to
+run `winget install roderio.YouputDesk`.
+
 **Portable:** download `YouputDesk-<version>-portable.exe` (or the smaller `-x64` / `-arm64` one for your PC)
 and run it from anywhere, even a USB stick. It keeps its data in a `YouputDesk-data` folder beside the exe and
 doesn't update itself. Your Google sign-in is encrypted for your Windows account, so on another PC you'll be
 asked to sign in again.
 
-To uninstall, go to Windows Settings → Apps (or `winget uninstall` / `scoop uninstall`). Uninstalling also
+To uninstall, go to Windows Settings → Apps (or `scoop uninstall youputdesk`). Uninstalling also
 removes all of YouputDesk's data.
 
 ## FAQ
@@ -72,7 +69,7 @@ removes all of YouputDesk's data.
 The installer isn't code-signed yet, so SmartScreen doesn't recognize it. Click **More info → Run anyway**.
 Releases are built only by GitHub Actions from this public source code, and they'll be signed through the
 SignPath Foundation once the project's application is approved (see the
-[code signing policy](#code-signing-policy)). Installing with winget or Scoop skips this dialog.
+[code signing policy](#code-signing-policy)). Installing with Scoop skips this dialog.
 
 **Does YouTube Music Premium work?**
 Yes. It's the real YouTube Music website, so signing in with your Google account works as it does in a browser.
