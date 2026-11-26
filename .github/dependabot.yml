@@ -1,10 +1,20 @@
+# Routine version updates come as one grouped pull request per ecosystem each week. Major versions
+# still get a pull request of their own, since they can need code changes. Security updates aren't
+# affected by any of this: Dependabot opens them as soon as an advisory is published.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
