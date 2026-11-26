@@ -66,6 +66,8 @@ Made a theme you like? Export it from the theme editor and share the file in the
 Releases are only ever built by CI. Keep 2FA on the GitHub account and protect the `main` branch and `v*` tags,
 because anyone who can publish a release can ship an update.
 
-Each published release is also submitted to WinGet automatically (`.github/workflows/winget.yml`, which needs
-a `WINGET_TOKEN` secret: a classic token with the `public_repo` scope). The Scoop bucket
+WinGet: the first version is [waiting for approval](https://github.com/microsoft/winget-pkgs/pull/490360).
+After that, `.github/workflows/winget.yml` submits new releases (it needs a `WINGET_TOKEN` secret: a classic
+token with the `public_repo` scope). It's manual (Actions → Publish to WinGet → Run workflow) until its
+`release` trigger is added back. The Scoop bucket
 ([roderio/scoop-bucket](https://github.com/roderio/scoop-bucket)) picks up new releases on its own.
