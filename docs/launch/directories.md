@@ -11,7 +11,7 @@ for a while. If one does, come back after the launch posts.
   ad alerts and Discord status. No accounts or analytics.
 - **Alternative to:** YouTube Music, YouTube Music Desktop App (th-ch)
 - **Platforms:** Windows
-- **License:** Free, Open Source (MIT)
+- **License:** Free, Open Source (Apache 2.0)
 - **Tags:** music-player, youtube-music, equalizer, lyrics, discord-integration, portable
 
 ## sindresorhus/awesome-electron (Apps → Open Source)

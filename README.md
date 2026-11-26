@@ -10,7 +10,7 @@
 [![Downloads](https://img.shields.io/github/downloads/roderio/youputdesk/total)](https://github.com/roderio/youputdesk/releases)
 [![winget](https://img.shields.io/winget/v/roderio.YouputDesk?label=winget)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/r/roderio/YouputDesk)
 [![CI](https://github.com/roderio/youputdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/roderio/youputdesk/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/github/license/roderio/youputdesk)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/github/license/roderio/youputdesk)](LICENSE)
 
 ### [⬇ Download for Windows](https://github.com/roderio/youputdesk/releases/latest) · [Website](https://roderio.github.io/youputdesk/)
 
