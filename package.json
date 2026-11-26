@@ -18,25 +18,25 @@
     "social": "node scripts/social-preview.mjs"
   },
   "devDependencies": {
-    "@types/node": "^26.6.3",
-    "electron": "^44.5.1",
-    "electron-builder": "^26.15.3",
+    "@types/node": "^26.6.11",
+    "electron": "^44.11.6",
+    "electron-builder": "^26.18.0",
     "electron-vite": "^5.0.0",
     "typescript": "^7.0.2",
-    "vite": "^7.3.6",
-    "vitest": "^5.0.3"
+    "vite": "^7.3.8",
+    "vitest": "^5.1.2"
   },
   "dependencies": {
     "@xhayper/discord-rpc": "^1.5.1",
     "electron-store": "^11.0.2",
-    "electron-updater": "^6.8.9",
+    "electron-updater": "^6.8.11",
     "preact": "^10.29.8"
   },
   "allowScripts": {
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true,
-    "electron@44.5.1": true,
-    "electron-winstaller": false
+    "electron-winstaller": false,
+    "electron@44.11.6": true
   },
   "author": "roderio",
   "build": {
