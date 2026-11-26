@@ -18,6 +18,20 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm audit --omit=dev --audit-level=high
       - run: npm run typecheck
       - run: npm test
+
+  # Separate from the tests so a newly published advisory shows up as its own failing check
+  # instead of hiding inside the test job. npm audit reads the lockfile, so no install is needed.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+      # Electron is a devDependency, so the step above skips it, but it's the runtime users run.
+      - name: Electron
+        run: node scripts/audit-electron.mjs
