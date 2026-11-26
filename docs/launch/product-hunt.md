@@ -19,5 +19,5 @@ ad alerts and Discord status. No accounts, no analytics.
 **Maker's first comment:**
 
 Hi Product Hunt! I built YouputDesk because I listen to YouTube Music all day and wanted an EQ, synced lyrics and
-hotkeys that work from any app. It's MIT licensed and built in the open, and it's private by default: nothing
+hotkeys that work from any app. It's Apache 2.0 licensed and built in the open, and it's private by default: nothing
 leaves your PC until you allow it. I'd love to hear what you'd add next.

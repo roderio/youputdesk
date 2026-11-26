@@ -22,7 +22,7 @@ A few parts that might interest HN:
 - Privacy: no telemetry. Every feature that talks to another service (Discord, lyrics, update checks) is opt-in
   on first launch.
 
-It's MIT licensed. Releases are built only by GitHub Actions; they're unsigned for now (SignPath application
+It's Apache 2.0 licensed. Releases are built only by GitHub Actions; they're unsigned for now (SignPath application
 pending), so `winget install roderio.YouputDesk` is the smoothest way to try it.
 
 I'd love feedback, especially on what breaks when YouTube changes its markup.

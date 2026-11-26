@@ -19,7 +19,7 @@ music.youtube.com in a desktop window (so your account, library and Premium work
 - Global hotkeys, media keys, taskbar buttons, Discord status
 - Alerts you when an ad starts, and one-key skip when YouTube shows the Skip button (it doesn't block ads)
 
-It's free and open source (MIT), with no accounts or analytics. Windows 10/11, x64 and ARM.
+It's free and open source (Apache 2.0), with no accounts or analytics. Windows 10/11, x64 and ARM.
 
 Download: https://roderio.github.io/youputdesk/
 Source: https://github.com/roderio/youputdesk
