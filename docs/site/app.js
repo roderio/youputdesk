@@ -115,10 +115,15 @@ async function setupDownload() {
   const setupLink = document.getElementById('setup-link')
   const portableLink = document.getElementById('portable-link')
 
-  let arm = false
+  const appImageLink = document.getElementById('appimage-link')
+  const debLink = document.getElementById('deb-link')
+
+  const platform = navigator.userAgentData?.platform ?? navigator.platform ?? ''
+  const linux = /Linux/i.test(platform) && !/Android/i.test(navigator.userAgent)
+  let arm = /aarch64|arm/i.test(navigator.platform ?? '')
   try {
     const ua = await navigator.userAgentData?.getHighEntropyValues(['architecture'])
-    arm = ua?.architecture === 'arm'
+    if (ua?.architecture) arm = ua.architecture === 'arm'
   } catch {}
 
   try {
@@ -131,7 +136,16 @@ async function setupDownload() {
     const setup = find(/^YouputDesk-Setup-.*\.exe$/)
     const portable = find(arm ? /-portable-arm64\.exe$/ : /-portable-x64\.exe$/) ?? find(/-portable\.exe$/)
     const version = release.tag_name.replace(/^v/, '')
-    if (setup) {
+    const appImage = find(arm ? /-arm64\.AppImage$/ : /-x86_64\.AppImage$/)
+    const deb = find(arm ? /_arm64\.deb$/ : /_amd64\.deb$/)
+    if (appImage) appImageLink.href = appImage.browser_download_url
+    if (deb) debLink.href = deb.browser_download_url
+    if (linux && appImage) {
+      button.href = appImage.browser_download_url
+      button.textContent = 'Download for Linux'
+      const mb = Math.round(appImage.size / 1024 / 1024)
+      meta.textContent = `Version ${version}, ${mb} MB. For Linux (beta)${arm ? ' on ARM64' : ''}. Free and open source.`
+    } else if (setup) {
       button.href = setupLink.href = setup.browser_download_url
       const mb = Math.round(setup.size / 1024 / 1024)
       meta.textContent = `Version ${version}, ${mb} MB. For Windows 10 and 11${arm ? ', including your ARM PC' : ''}. Free and open source.`
