@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { PARTITION, YTM_URL } from '../shared/config'
 import { openSignIn } from './auth'
+import { windowIconName } from '../shared/platform'
 import { asset, ctx, isOnScreen } from './context'
 import { openExternal } from './external'
 import { isGoogleSignIn, isMainAllowed } from './navigation'
@@ -44,7 +45,7 @@ export function createMainWindow(opts: { deferShow?: boolean } = {}): BrowserWin
     backgroundColor: '#030303',
     title: 'YouputDesk',
     // Same design as the tray icon.
-    icon: asset('icon.ico'),
+    icon: asset(windowIconName(process.platform)),
     autoHideMenuBar: true,
     webPreferences: {
       partition: PARTITION,

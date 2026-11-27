@@ -1,6 +1,7 @@
 // Must be first: picks the profile folder before anything reads userData.
 import './profile'
 import { app, Menu } from 'electron'
+import { isLinux } from '../shared/platform'
 import { ctx, showMainWindow } from './context'
 import { confirmDeleteAllData } from './data'
 import { setupDiscord } from './discord'
@@ -17,9 +18,15 @@ import { applyIdentity, setupIdentity } from './ua'
 import { checkForUpdatesNow, runLaunchUpdate, setupUpdater, updatesEnabled } from './updater'
 import { createMainWindow, revealMainWindow } from './window'
 
-// Toasts need an app identity on Windows. The installer registers this one; in development
-// Windows only shows toasts for the running executable's path.
-app.setAppUserModelId(app.isPackaged ? 'com.youputdesk.app' : process.execPath)
+if (isLinux()) {
+  // On Wayland, global shortcuts go through the desktop's GlobalShortcuts portal. Where the desktop
+  // doesn't offer it, registering fails and the Shortcuts panel says so.
+  app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+} else {
+  // Toasts need an app identity on Windows. The installer registers this one; in development
+  // Windows only shows toasts for the running executable's path.
+  app.setAppUserModelId(app.isPackaged ? 'com.youputdesk.app' : process.execPath)
+}
 
 const identities: { id: Identity; label: string }[] = [
   { id: 'native', label: 'Electron default (recommended)' },

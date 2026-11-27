@@ -1,5 +1,6 @@
 import type { Rectangle } from 'electron'
 import { BANDS } from './eq'
+import { defaultCloseToTray } from './platform'
 import { defaultBindings, type Bindings } from './shortcuts'
 import type { Theme } from './themes'
 
@@ -77,7 +78,7 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcuts: defaultBindings(),
   notifications: { ads: true, trackChange: false },
   discord: { enabled: false, showWhenPaused: false },
-  tray: { closeToTray: true, trayHintShown: false },
+  tray: { closeToTray: defaultCloseToTray(process.platform), trayHintShown: false },
   lyrics: { fontScale: 1 },
   accessibility: { adChime: false, chimeVolume: 0.6, uiScale: 1, highContrast: false, reduceMotion: false, announce: true },
   mini: { pinned: false },
