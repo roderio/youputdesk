@@ -52,7 +52,8 @@ which the user accepted with "let's do Linux".
   - `build.linux` with targets `AppImage` and `deb` for `x64` and `arm64`, category
     `AudioVideo;Audio;Player;`, icon from a 512×512 PNG in `build/icons`, and artifact names like
     `YouputDesk-<version>-<arch>.AppImage` and `youputdesk_<version>_<arch>.deb`.
-  - `build.deb.maintainer` (see "Open question" below).
+  - `build.linux.maintainer`: `roderio <170575546+roderio@users.noreply.github.com>` (the user's GitHub
+    no-reply address, chosen by the user; it's public in every .deb).
   - The `description` no longer says "for Windows".
 - `scripts/gen-icons.mjs` also writes the Linux PNG icon sizes.
 - `.github/workflows/release.yml`:
@@ -62,8 +63,8 @@ which the user accepted with "let's do Linux".
     and runs the same checks (audit, Electron audit, tag matches version, typecheck, tests) and then
     `electron-builder --linux --<arch> --publish always`. Each architecture builds natively.
 - New npm scripts: `dist:linux` and `release:linux`. The existing `dist`/`release` stay Windows-only.
-- CI (`ci.yml`) is unchanged. Its required checks are named `test` and `audit`, and branch protection
-  depends on those names.
+- CI (`ci.yml`) keeps its `test` and `audit` jobs as they are, because branch protection requires those
+  names. It gains a `linux` smoke-test job (see Testing), which is not a required check at first.
 
 ### App code (each change only takes effect on Linux, guarded by `process.platform`)
 
@@ -100,11 +101,30 @@ which the user accepted with "let's do Linux".
 
 ## Testing
 
-- Unit tests (vitest) for the pure parts: the Firefox UA per platform and the shortcut wording.
-- Manual test of the x64 AppImage and .deb in the Ubuntu install on WSL2 (WSLg): sign-in, playback, the
-  equalizer, lyrics, the mini player, tray menu, notifications, hotkeys and Discord status. Updating is
-  tested by installing one version and publishing a newer test release.
-- arm64 is built in CI only. Nothing here can run it, and the release notes say so.
+The user has no Linux machine to test on, so testing can't rely on them. It has three layers:
+
+1. **Unit tests** (vitest) for the pure parts: the Firefox UA per platform, the shortcut wording and the
+   Linux close-to-tray default.
+2. **Automated Linux smoke test in CI**, on both x64 and arm64 runners. It builds the AppImage, launches it
+   under a virtual display (`xvfb-run`) with an isolated profile and `--remote-debugging-port`, and checks
+   over CDP that:
+   - the main window opens and loads music.youtube.com;
+   - the in-page overlay (the preload) is injected;
+   - the app quits cleanly.
+
+   This runs in a new `linux` job in `ci.yml` (on pull requests that touch the app, the build config or the
+   workflows) and again in the release workflow before publishing, so a broken Linux build never reaches
+   the release. It is the only check arm64 gets before release.
+3. **Hands-on test by Claude in WSL** (the user's PC has Ubuntu 24.04 on WSL2 with WSLg, which can show
+   Linux windows). It covers the x64 AppImage and .deb: sign-in, playback, the equalizer, lyrics, the mini
+   player, the tray menu, notifications and hotkeys. It needs a one-time library install that only the user
+   can run, because it asks for their Linux password:
+   `sudo apt-get install -y libnss3 libasound2t64 libxss1 libsecret-1-0 xdg-utils libfuse2t64`.
+   WSL is not a real desktop (no tray panel, no Discord, no real Wayland desktop), so tray, Discord status
+   and Wayland hotkeys stay unverified, and the beta label says so.
+
+Updating is tested end to end once 0.3.0 is out: the 0.3.1 release is the first real Linux update.
+Neither the user nor this plan can test arm64 hands-on.
 
 ## Known limitations (documented, not fixed)
 
@@ -112,14 +132,14 @@ which the user accepted with "let's do Linux".
   hotkey) brings the window back, since a second launch shows the running instance.
 - Discord installed as Flatpak or Snap uses a different IPC socket path that the Discord library may not
   find.
-- arm64 is untested on real hardware before release.
+- arm64 only gets the automated smoke test, never a hands-on test, before release.
+- On Ubuntu 22.04+ the AppImage needs `libfuse2` (`libfuse2t64` on 24.04). The README says so; the .deb
+  doesn't need it.
+- Because the user can't test on Linux, Linux bug reports will come from users. The README asks Linux users
+  to report problems, and the issue template gets an OS field.
 
 ## Left to the builder
 
-- The exact layout of the release workflow jobs and steps, within the constraints above.
+- The exact layout of the workflow jobs and steps, within the constraints above.
 - The icon sizes to generate.
-
-## Open question for the user
-
-- **The .deb maintainer field must include an email address**, and it's public in every .deb. Use the
-  GitHub no-reply address (`170575546+roderio@users.noreply.github.com`) or another address you choose?
+- How the smoke test waits for the page and what it treats as "loaded" (no Google sign-in in CI).
