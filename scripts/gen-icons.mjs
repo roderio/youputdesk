@@ -159,4 +159,9 @@ for (const [name, shape] of Object.entries(glyphs)) {
 const windowsIcon = ico([16, 24, 32, 48, 64, 128, 256].map((size) => ({ size, data: png(size, appIcon(size, { ringOn: false })) })))
 writeFileSync('build/icon.ico', windowsIcon)
 writeFileSync('resources/icon.ico', windowsIcon)
-console.log('Icons written to resources/, build/icon.ico and resources/icon.ico')
+// Linux desktop entries pick a size from build/icons; same ring-less design as the Windows icon.
+mkdirSync('build/icons', { recursive: true })
+for (const size of [16, 32, 48, 64, 128, 256, 512]) {
+  writeFileSync(`build/icons/${size}x${size}.png`, png(size, appIcon(size, { ringOn: false })))
+}
+console.log('Icons written to resources/, build/icon.ico, resources/icon.ico and build/icons/')
