@@ -1,0 +1,52 @@
+# Builds the Linux packages (AppImage and .deb) on x64 and arm64 and smoke-tests both: each one is started
+# under a virtual display and must load YouTube Music with our overlay injected. Nobody on the team runs
+# Linux, so this is what catches a broken Linux build before it reaches a release.
+# A separate workflow (not a job in ci.yml) so docs-only changes can skip it without affecting the
+# required `test` and `audit` checks.
+name: Linux build
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
+  pull_request:
+    paths-ignore: ['docs/**', '**/*.md']
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # xvfb: a virtual display. libfuse2t64: AppImages need FUSE 2, which Ubuntu 24.04 doesn't install.
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libfuse2t64
+      # Only this runner's architecture: each builds natively.
+      - run: npm run dist:linux -- --${{ matrix.runner == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }} --publish never
+      - name: Smoke test the AppImage
+        run: |
+          chmod +x dist/*.AppImage
+          xvfb-run -a node scripts/smoke-linux.mjs dist/*.AppImage
+      - name: Smoke test the .deb
+        run: |
+          sudo apt-get install -y ./dist/*.deb
+          xvfb-run -a node scripts/smoke-linux.mjs /opt/YouputDesk/youputdesk
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: linux-${{ matrix.runner }}
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+          retention-days: 7
+          if-no-files-found: ignore
