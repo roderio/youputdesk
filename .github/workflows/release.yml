@@ -1,5 +1,7 @@
-# Builds the Windows installer and portable exes when a version tag is pushed, and uploads them
-# (with latest.yml, the auto-update feed) to a draft GitHub release. Review it, then publish.
+# Builds the Windows installer and portable exes, and the Linux AppImage and .deb packages (x64 and arm64),
+# when a version tag is pushed. Every job uploads to one draft GitHub release, together with the
+# auto-update feeds (latest.yml for Windows, latest-linux.yml and latest-linux-arm64.yml for Linux).
+# Review the draft, then publish. Don't publish it if any job failed.
 name: Release
 
 on:
@@ -10,10 +12,24 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: windows-latest
+  # Creates the one draft every build job uploads to. If the build jobs each created their own, the files
+  # would end up split across several releases.
+  draft:
+    runs-on: ubuntu-latest
     steps:
       # Actions are pinned to commit SHAs so a moved tag can't change what runs. Dependabot bumps them.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tag matches package.json version
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - name: Create draft release
+        run: gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "${GITHUB_REF_NAME#v}" --notes ""
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    needs: draft
+    runs-on: windows-latest
+    steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -24,16 +40,38 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
       - name: Fail on known high-severity advisories in Electron (a devDependency, but shipped)
         run: node scripts/audit-electron.mjs
-      - name: Tag matches package.json version
-        shell: bash
-        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
-      # The installer and portable targets publish in parallel; if neither finds a draft, each creates
-      # its own and the files end up split across two releases. Create the one draft up front.
-      - name: Create draft release
-        shell: bash
-        run: gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "${GITHUB_REF_NAME#v}" --notes ""
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Each architecture builds natively. The smoke test runs after the upload (electron-builder publishes
+  # as it builds), so a failure here means: don't publish the draft.
+  linux:
+    needs: draft
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Fail on known vulnerabilities in shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Fail on known high-severity advisories in Electron (a devDependency, but shipped)
+        run: node scripts/audit-electron.mjs
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libfuse2t64
+      # Desktop Ubuntu 24.04 blocks unprivileged user namespaces (which Chromium's sandbox uses) through
+      # AppArmor; GitHub's runners don't. Turn the restriction on so the smoke tests see what users get.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=1
+      - run: npm run release:linux -- --${{ matrix.runner == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Smoke test the AppImage
+        run: |
+          chmod +x dist/*.AppImage
+          xvfb-run -a node scripts/smoke-linux.mjs dist/*.AppImage

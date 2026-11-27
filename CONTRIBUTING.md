@@ -11,7 +11,7 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Development
 
-You need Windows and Node.js 24.
+You need Node.js 24. Development mostly happens on Windows; Linux works too.
 
 ```sh
 npm install
@@ -19,7 +19,8 @@ npm run dev        # run with hot reload
 npm test           # unit tests
 npm run typecheck
 npm run dist       # typecheck + test + build the installer and portable exes into dist/
-npm run icons      # regenerate icons in resources/ and build/icon.ico
+npm run dist:linux # the same for the Linux AppImage and .deb (run it on Linux; CI does this in linux.yml)
+npm run icons      # regenerate icons in resources/, build/icon.ico and build/icons/
 ```
 
 `YOUPUTDESK_PROFILE=test npm run dev` runs a separate profile (its own login, settings and

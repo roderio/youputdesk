@@ -20,12 +20,13 @@ body:
   - type: dropdown
     id: install
     attributes:
-      label: Installed or portable?
-      options: [Installed, Portable]
+      label: How did you install it?
+      options: [Windows installer, Windows portable, Scoop, Linux AppImage, Linux .deb]
     validations:
       required: true
   - type: input
     id: windows
     attributes:
-      label: Windows version
-      placeholder: Windows 11 24H2, x64
+      label: OS and version
+      description: On Linux, include the desktop (GNOME, KDE…) and whether it's Wayland or X11.
+      placeholder: Windows 11 24H2, x64 / Ubuntu 24.04, GNOME on Wayland, arm64

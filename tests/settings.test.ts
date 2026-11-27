@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { matchPreset, PRESETS } from '../src/shared/eq'
 import { allows, DEFAULT_SETTINGS, withDefaults } from '../src/shared/settings'
+import { defaultCloseToTray } from '../src/shared/platform'
 
 describe('withDefaults', () => {
   it('fills keys added in newer versions without touching stored values', () => {
@@ -46,4 +47,20 @@ describe('matchPreset', () => {
     expect(matchPreset([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], { Mine: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] })).toBe('Mine')
     expect(matchPreset([9, 0, 0, 0, 0, 0, 0, 0, 0, 0], {})).toBeNull()
   })
+})
+
+describe('close-to-tray default', () => {
+  it('is off on Linux, where GNOME may have no tray', async () => {
+    const real = Object.getOwnPropertyDescriptor(process, 'platform')!
+    Object.defineProperty(process, 'platform', { value: 'linux' })
+    try {
+      vi.resetModules()
+      const { DEFAULT_SETTINGS: linux } = await import('../src/shared/settings')
+      expect(linux.tray.closeToTray).toBe(false)
+    } finally {
+      Object.defineProperty(process, 'platform', real)
+      vi.resetModules()
+    }
+  })
+  it('is on on Windows', () => expect(defaultCloseToTray('win32')).toBe(true))
 })

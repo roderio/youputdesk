@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouputDesk: YouTube Music desktop app for Windows</title>
-  <meta name="description" content="A free, open-source desktop app for YouTube Music on Windows. Adds a 10-band equalizer, synced lyrics, themes, a tray mini player, global hotkeys and Discord status. Premium works.">
+  <title>YouputDesk: YouTube Music desktop app for Windows and Linux</title>
+  <meta name="description" content="A free, open-source desktop app for YouTube Music on Windows and Linux. Adds a 10-band equalizer, synced lyrics, themes, a tray mini player, global hotkeys and Discord status. Premium works.">
   <link rel="canonical" href="https://roderio.github.io/youputdesk/">
   <link rel="icon" type="image/png" href="icon.png">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#170f20">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="YouputDesk: YouTube Music desktop app for Windows">
+  <meta property="og:title" content="YouputDesk: YouTube Music desktop app for Windows and Linux">
   <meta property="og:description" content="Equalizer, synced lyrics, themes, a tray mini player and global hotkeys for YouTube Music. Free and open source.">
   <meta property="og:url" content="https://roderio.github.io/youputdesk/">
   <meta property="og:image" content="https://roderio.github.io/youputdesk/social-preview.png">
@@ -25,9 +25,9 @@
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "YouputDesk",
-    "description": "Desktop app for YouTube Music on Windows with an equalizer, synced lyrics, themes, a tray mini player and global hotkeys.",
+    "description": "Desktop app for YouTube Music on Windows and Linux with an equalizer, synced lyrics, themes, a tray mini player and global hotkeys.",
     "applicationCategory": "MultimediaApplication",
-    "operatingSystem": "Windows 10, Windows 11",
+    "operatingSystem": "Windows 10, Windows 11, Linux",
     "url": "https://roderio.github.io/youputdesk/",
     "downloadUrl": "https://github.com/roderio/youputdesk/releases/latest",
     "license": "https://www.apache.org/licenses/LICENSE-2.0",
@@ -49,7 +49,7 @@
     <section class="hero">
       <div class="hero-text">
         <h1>YouTube Music, with the controls you wished it had.</h1>
-        <p class="lede">A free Windows app that runs the real YouTube Music and adds an equalizer, synced lyrics,
+        <p class="lede">A free app for Windows and Linux that runs the real YouTube Music and adds an equalizer, synced lyrics,
           themes, a tray mini player and global hotkeys. Your account and Premium work as usual.</p>
         <div class="cta">
           <a class="button" id="download" href="https://github.com/roderio/youputdesk/releases/latest">Download for Windows</a>
@@ -90,7 +90,7 @@
       <article class="feature">
         <div>
           <h2>Know when an ad starts</h2>
-          <p>A banner and a Windows notification tell you when an ad plays, and one key skips it whenever YouTube
+          <p>A banner and a desktop notification tell you when an ad plays, and one key skips it whenever YouTube
             allows. High contrast, reduced motion and screen reader announcements are built in.</p>
         </div>
         <img src="screenshots/settings-panel.png" width="720" height="860" alt="Settings panel with ad alerts and accessibility options" loading="lazy">
@@ -110,6 +110,7 @@
         <button role="tab" id="tab-winget" aria-controls="panel-winget" aria-selected="false" tabindex="-1">winget</button>
         <button role="tab" id="tab-scoop" aria-controls="panel-scoop" aria-selected="false" tabindex="-1">Scoop</button>
         <button role="tab" id="tab-portable" aria-controls="panel-portable" aria-selected="false" tabindex="-1">Portable</button>
+        <button role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux (beta)</button>
       </div>
       <div class="panel" role="tabpanel" id="panel-installer" aria-labelledby="tab-installer">
         <p>Download <a id="setup-link" href="https://github.com/roderio/youputdesk/releases/latest">the installer</a> and open it.
@@ -131,6 +132,18 @@ scoop install youputdesk</code><button class="copy" type="button">Copy</button><
       <div class="panel" role="tabpanel" id="panel-portable" aria-labelledby="tab-portable" hidden>
         <p>Download <a id="portable-link" href="https://github.com/roderio/youputdesk/releases/latest">the portable exe</a> and run it
           from anywhere, even a USB stick. It keeps its data in a <code>YouputDesk-data</code> folder beside it and doesn't update itself.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux" hidden>
+        <p>For x64 and ARM64 PCs. On Ubuntu, Debian or Mint, download <a id="deb-link" href="https://github.com/roderio/youputdesk/releases/latest">the .deb</a>
+          and install it. It updates itself.</p>
+        <pre><code>sudo apt install ./youputdesk_*.deb</code><button class="copy" type="button">Copy</button></pre>
+        <p>On other distros, download <a id="appimage-link" href="https://github.com/roderio/youputdesk/releases/latest">the AppImage</a>,
+          then make it executable and run it:</p>
+        <pre><code>chmod +x YouputDesk-*.AppImage
+./YouputDesk-*.AppImage</code><button class="copy" type="button">Copy</button></pre>
+        <p class="note">Linux support is new. On Ubuntu 24.04 and later, use the .deb: the AppImage has to run without
+          Chromium's sandbox there. AppImages need FUSE 2 (<code>libfuse2</code>).
+          Please <a href="https://github.com/roderio/youputdesk/issues/new/choose">report anything that doesn't work</a>.</p>
       </div>
     </section>
 

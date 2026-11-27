@@ -1,5 +1,6 @@
-/** Taskbar integration: thumbnail toolbar (prev / play-pause / next), progress and window title. */
+/** Taskbar integration: thumbnail toolbar (prev / play-pause / next, Windows only), progress and window title. */
 import type { BrowserWindow } from 'electron'
+import { isLinux } from '../shared/platform'
 import { assetImage, sendAction } from './context'
 import { player } from './player'
 
@@ -14,6 +15,8 @@ export function setupTaskbar(win: BrowserWindow): void {
 
   const setButtons = (playing: boolean) => {
     shownPlaying = playing
+    // Thumbnail toolbars are a Windows taskbar feature; Linux has nothing to put them on.
+    if (isLinux()) return
     win.setThumbarButtons([
       { tooltip: 'Previous', icon: icons.prev, click: () => sendAction('previous') },
       { tooltip: playing ? 'Pause' : 'Play', icon: playing ? icons.pause : icons.play, click: () => sendAction('playPause') },

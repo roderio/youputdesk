@@ -11,6 +11,7 @@
  */
 import { app, session } from 'electron'
 import { PARTITION } from '../shared/config'
+import { firefoxPlatformToken } from '../shared/platform'
 import { store, type Identity } from './store'
 
 const NATIVE_UA = app.userAgentFallback
@@ -27,7 +28,7 @@ function chromeUA(): string {
 export function firefoxUA(): string {
   const weeks = (Date.now() - Date.UTC(2024, 6, 9)) / (7 * 24 * 3600 * 1000)
   const version = 128 + Math.max(0, Math.floor(weeks / 4))
-  return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version}.0) Gecko/20100101 Firefox/${version}.0`
+  return `Mozilla/5.0 (${firefoxPlatformToken(process.platform, process.arch)}; rv:${version}.0) Gecko/20100101 Firefox/${version}.0`
 }
 
 /** webContents ids that should look like Firefox on the wire (no Chromium client hints). */

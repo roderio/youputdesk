@@ -4,14 +4,14 @@
 
 # YouputDesk
 
-**A desktop app for YouTube Music on Windows**, with an equalizer, synced lyrics, themes, a mini player and global hotkeys.
+**A desktop app for YouTube Music on Windows and Linux (beta)**, with an equalizer, synced lyrics, themes, a mini player and global hotkeys.
 
 [![Latest release](https://img.shields.io/github/v/release/roderio/youputdesk?label=release)](https://github.com/roderio/youputdesk/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/roderio/youputdesk/total)](https://github.com/roderio/youputdesk/releases)
 [![CI](https://github.com/roderio/youputdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/roderio/youputdesk/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/github/license/roderio/youputdesk)](LICENSE)
 
-### [⬇ Download for Windows](https://github.com/roderio/youputdesk/releases/latest) · [Website](https://roderio.github.io/youputdesk/)
+### [⬇ Download](https://github.com/roderio/youputdesk/releases/latest) · [Website](https://roderio.github.io/youputdesk/)
 
 <img src="docs/screenshots/demo.gif" width="800" alt="YouputDesk: equalizer, synced lyrics and the mini player">
 
@@ -38,7 +38,7 @@ Plus:
 
 ## Install
 
-Pick whichever you like. All of them work on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs.
+**Windows:** pick whichever you like. All of them work on Windows 10 and 11, on both Intel/AMD (x64) and ARM PCs.
 
 **Installer** (recommended): download **`YouputDesk-Setup-<version>.exe`** from the
 [latest release](https://github.com/roderio/youputdesk/releases/latest) and open it. It installs in a few
@@ -62,6 +62,42 @@ asked to sign in again.
 
 To uninstall, go to Windows Settings → Apps (or `scoop uninstall youputdesk`). Uninstalling also
 removes all of YouputDesk's data.
+
+### Linux (beta)
+
+For x64 and ARM64 (`arm64`/`aarch64`) PCs. Download from the
+[latest release](https://github.com/roderio/youputdesk/releases/latest):
+
+**.deb** (recommended on Ubuntu, Debian and Mint): download `youputdesk_<version>_amd64.deb` (or `_arm64.deb`)
+and install it:
+
+```sh
+sudo apt install ./youputdesk_*_amd64.deb
+```
+
+It updates itself, and asks for your password to install each update.
+
+**AppImage** (other distros): download `YouputDesk-<version>-<arch>.AppImage`, make it executable and run it:
+
+```sh
+chmod +x YouputDesk-*.AppImage
+./YouputDesk-*.AppImage
+```
+
+It updates itself. AppImages need FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04).
+
+Why the .deb on Ubuntu: Ubuntu 24.04 and later block what Chromium's sandbox needs unless an app ships a
+security profile. The .deb installs one; an AppImage can't, so it starts without the sandbox there, and
+YouputDesk tells you so once. The sandbox is what keeps a malicious web page from reaching your files.
+
+Linux support is new and hasn't been tried on every desktop yet. If something doesn't work, please
+[open an issue](https://github.com/roderio/youputdesk/issues/new/choose). Known limits: GNOME only shows a
+tray icon with the AppIndicator extension (so "Close to tray" starts off on Linux), global hotkeys on Wayland
+need a desktop that supports the GlobalShortcuts portal, and Discord status may not reach Discord installed as
+a Flatpak or Snap.
+
+To uninstall, delete the AppImage or run `sudo apt remove youputdesk`. Your data stays in
+`~/.config/YouputDesk`; delete that folder to remove it too.
 
 ## FAQ
 

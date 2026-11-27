@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron'
 import { useState } from 'preact/hooks'
 import { IPC } from '../../shared/ipc'
 import { UI_SCALES } from '../../shared/settings'
+import { notificationsHelp } from '../../shared/platform'
 import { playChime } from '../chime'
 import { setState, updateSettings, useUi } from '../store'
 import { PRIVACY_TEXT } from './Modals'
@@ -17,13 +18,13 @@ export function SettingsPanel() {
   return (
     <div class="panel-body settings">
       <Section title="Notifications">
-        <Row icon="bell" title="Ad alerts" hint={<>Banner and Windows notification when an ad plays, with a skip shortcut (<Keys accelerator={s.shortcuts.skipAd.accelerator} muted />)</>}>
+        <Row icon="bell" title="Ad alerts" hint={<>Banner and desktop notification when an ad plays, with a skip shortcut (<Keys accelerator={s.shortcuts.skipAd.accelerator} muted />)</>}>
           <Switch checked={s.notifications.ads} label="Ad alerts" onChange={(ads) => updateSettings('notifications', { ads })} />
         </Row>
-        <Row icon="note" title="Now playing pop-ups" hint="Windows notification on song change. Shown only while YouputDesk is minimised, in the tray, or behind other windows">
+        <Row icon="note" title="Now playing pop-ups" hint="Desktop notification on song change. Shown only while YouputDesk is minimised, in the tray, or behind other windows">
           <Switch checked={s.notifications.trackChange} label="Now playing pop-ups" onChange={(trackChange) => updateSettings('notifications', { trackChange })} />
         </Row>
-        <Row title="Test notifications" hint="Nothing appears? Check Windows Settings → System → Notifications, and Do not disturb">
+        <Row title="Test notifications" hint={notificationsHelp(process.platform)}>
           <Button onClick={() => ipcRenderer.send(IPC.appAction, 'testNotification')}>Send test</Button>
         </Row>
       </Section>

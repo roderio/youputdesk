@@ -1,5 +1,6 @@
 import type { Rectangle } from 'electron'
 import { BANDS } from './eq'
+import { defaultCloseToTray } from './platform'
 import { defaultBindings, type Bindings } from './shortcuts'
 import type { Theme } from './themes'
 
@@ -36,6 +37,8 @@ export type Settings = {
   notifications: { ads: boolean; trackChange: boolean }
   discord: { enabled: boolean; showWhenPaused: boolean }
   tray: { closeToTray: boolean; trayHintShown: boolean }
+  /** One-time notices the app has already shown. */
+  notices: { noSandbox: boolean }
   lyrics: { fontScale: number }
   accessibility: {
     /** Chime when an ad becomes skippable, repeated a few times until it's skipped. */
@@ -77,7 +80,8 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcuts: defaultBindings(),
   notifications: { ads: true, trackChange: false },
   discord: { enabled: false, showWhenPaused: false },
-  tray: { closeToTray: true, trayHintShown: false },
+  tray: { closeToTray: defaultCloseToTray(process.platform), trayHintShown: false },
+  notices: { noSandbox: false },
   lyrics: { fontScale: 1 },
   accessibility: { adChime: false, chimeVolume: 0.6, uiScale: 1, highContrast: false, reduceMotion: false, announce: true },
   mini: { pinned: false },

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { ACTION_IDS, ACTIONS, defaultBindings, eventToAccelerator, findConflicts, isSafeGlobal, normalize, type ActionId } from '../../shared/shortcuts'
+import { superKeyName } from '../../shared/platform'
 import { setState, toast, updateSettings, useUi } from '../store'
 import { Icon } from './icons'
 import { Button, Keys } from './ui'
@@ -55,7 +56,7 @@ export function ShortcutsPanel() {
               : failed.includes(id) && b.global
                 ? 'Another app is already using this combo'
                 : b.global && b.accelerator && !isSafeGlobal(b.accelerator)
-                  ? 'Global shortcuts need Ctrl, Alt or Win'
+                  ? `Global shortcuts need Ctrl, Alt or ${superKeyName(process.platform)}`
                   : ''
             return (
               <div class={`shortcut ${problem ? 'has-problem' : ''}`} key={id}>

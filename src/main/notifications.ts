@@ -1,4 +1,4 @@
-/** Windows toasts for ads and track changes. Only shown when the app isn't in front, where the in-page banner covers it. */
+/** Desktop notifications for ads and track changes. Only shown when the app isn't in front, where the in-page banner covers it. */
 import { net, nativeImage, Notification } from 'electron'
 import { prettyAccelerator } from '../shared/shortcuts'
 import { assetImage, isMainFocused, sendAction, showMainWindow } from './context'
@@ -31,7 +31,7 @@ async function artIcon(url: string) {
   return assetImage('icon.png')
 }
 
-/** From Settings: shows a toast right away, even with the window focused, so the user can check Windows lets us notify. */
+/** From Settings: shows a toast right away, even with the window focused, so the user can check the OS lets us notify. */
 export function showTestNotification(): void {
   if (!Notification.isSupported()) return
   const s = player.state

@@ -18,9 +18,10 @@ reproduce. You'll get a reply within a few days, and fixed versions reach users 
   microphone, location, USB, HID or serial access.
 - **The app can't be repurposed.** Electron fuses turn off `ELECTRON_RUN_AS_NODE`, `NODE_OPTIONS` and
   `--inspect`. The app code is integrity-checked at launch, so a modified `app.asar` won't load.
-- **Your sign-in is encrypted at rest** with Windows DPAPI.
+- **Your sign-in is encrypted at rest** with Windows DPAPI, or on Linux with the desktop's keyring (GNOME Keyring or
+  KWallet). Linux without a keyring is the exception: Chromium can then only obfuscate it.
 - **Updates are verified.** Each update's SHA-512 is checked against the release feed before it installs, and
   releases are built only by GitHub Actions from tagged commits.
 
-No software can protect data from malware that is already running as your Windows user. Keep Windows and your
+No software can protect data from malware that is already running as your user. Keep your system and your
 antivirus up to date.

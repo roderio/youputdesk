@@ -2,12 +2,13 @@ import { BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { PARTITION, YTM_URL } from '../shared/config'
 import { openSignIn } from './auth'
+import { isLinux, windowIconName } from '../shared/platform'
 import { asset, ctx, isOnScreen } from './context'
 import { openExternal } from './external'
 import { isGoogleSignIn, isMainAllowed } from './navigation'
 import { store } from './store'
 import { setupTaskbar } from './taskbar'
-import { showTrayBalloon } from './tray'
+import { showTrayHint } from './tray'
 
 /** Saved bounds, or undefined if they no longer fit on any connected display. */
 function restoredBounds() {
@@ -44,7 +45,7 @@ export function createMainWindow(opts: { deferShow?: boolean } = {}): BrowserWin
     backgroundColor: '#030303',
     title: 'YouputDesk',
     // Same design as the tray icon.
-    icon: asset('icon.ico'),
+    icon: asset(windowIconName(process.platform)),
     autoHideMenuBar: true,
     webPreferences: {
       partition: PARTITION,
@@ -85,7 +86,7 @@ export function createMainWindow(opts: { deferShow?: boolean } = {}): BrowserWin
     win.hide()
     if (!store.get('tray.trayHintShown')) {
       store.set('tray.trayHintShown', true)
-      showTrayBalloon('Still playing', 'YouputDesk keeps playing in the tray. Right-click the tray icon to quit.')
+      showTrayHint('Still playing', `YouputDesk keeps playing in the tray. ${isLinux() ? "Open the tray icon's menu" : 'Right-click the tray icon'} to quit.`)
     }
   })
 

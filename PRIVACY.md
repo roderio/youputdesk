@@ -5,12 +5,13 @@ collected by the people who make it.
 
 ## What stays on your PC
 
-Everything YouputDesk keeps is stored in your Windows user profile, in `%APPDATA%\YouputDesk`. The portable
-version uses a `YouputDesk-data` folder next to the exe instead.
+Everything YouputDesk keeps is stored in your user profile: `%APPDATA%\YouputDesk` on Windows and
+`~/.config/YouputDesk` on Linux. The Windows portable version uses a `YouputDesk-data` folder next to the exe
+instead.
 
 | What | Why |
 | --- | --- |
-| Your Google sign-in (cookies) | So you stay signed in to YouTube Music. Encrypted with Windows (DPAPI), so only your Windows account on this PC can use it |
+| Your Google sign-in (cookies) | So you stay signed in to YouTube Music. Encrypted with Windows (DPAPI), so only your Windows account on this PC can use it. On Linux it's encrypted with your desktop's keyring (GNOME Keyring or KWallet); without a keyring, Chromium only obfuscates it |
 | Settings, themes, EQ presets, shortcuts | Your preferences |
 | Lyrics cache | Lyrics you've already viewed, so they load instantly and work offline |
 | Window and mini player position | To reopen where you left it |
@@ -32,5 +33,6 @@ YouputDesk also blocks YouTube Music from using your camera, microphone, locatio
 ## Deleting your data
 
 - **Settings → Privacy → Delete all my data** signs you out and erases everything listed above.
-- **Uninstalling** YouputDesk (Windows Settings → Apps) removes the app and all of its data.
+- **Uninstalling** YouputDesk on Windows (Settings → Apps) removes the app and all of its data. On Linux,
+  uninstalling leaves `~/.config/YouputDesk`; delete that folder to remove your data.
 - For the portable version, delete the exe and its `YouputDesk-data` folder.

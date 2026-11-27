@@ -1,6 +1,7 @@
 // Must be first: picks the profile folder before anything reads userData.
 import './profile'
 import { app, Menu } from 'electron'
+import { isLinux } from '../shared/platform'
 import { ctx, showMainWindow } from './context'
 import { confirmDeleteAllData } from './data'
 import { setupDiscord } from './discord'
@@ -8,6 +9,7 @@ import { setupIpc } from './ipc'
 import { setupMiniPlayer } from './mini'
 import { setupNotifications } from './notifications'
 import { setupPalette } from './palette'
+import { setupSandboxNotice } from './sandbox'
 import { setupSecurity } from './security'
 import { setupShortcuts, teardownShortcuts } from './shortcuts'
 import { focusSplash, isSplashOpen, setupSplash } from './splash'
@@ -17,9 +19,15 @@ import { applyIdentity, setupIdentity } from './ua'
 import { checkForUpdatesNow, runLaunchUpdate, setupUpdater, updatesEnabled } from './updater'
 import { createMainWindow, revealMainWindow } from './window'
 
-// Toasts need an app identity on Windows. The installer registers this one; in development
-// Windows only shows toasts for the running executable's path.
-app.setAppUserModelId(app.isPackaged ? 'com.youputdesk.app' : process.execPath)
+if (isLinux()) {
+  // On Wayland, global shortcuts go through the desktop's GlobalShortcuts portal. Where the desktop
+  // doesn't offer it, registering fails and the Shortcuts panel says so.
+  app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+} else {
+  // Toasts need an app identity on Windows. The installer registers this one; in development
+  // Windows only shows toasts for the running executable's path.
+  app.setAppUserModelId(app.isPackaged ? 'com.youputdesk.app' : process.execPath)
+}
 
 const identities: { id: Identity; label: string }[] = [
   { id: 'native', label: 'Electron default (recommended)' },
@@ -84,8 +92,15 @@ if (!app.requestSingleInstanceLock()) {
     // With updates on, check behind the updater window while YouTube Music loads hidden.
     const launchUpdate = updatesEnabled()
     ctx.main = createMainWindow({ deferShow: launchUpdate })
-    ctx.main.on('closed', () => (ctx.main = null))
+    // Without the main window there's nothing to play or show. Quit, or a hidden mini player would keep a
+    // windowless app alive that relaunching can't bring back (it holds the single-instance lock).
+    ctx.main.on('closed', () => {
+      ctx.main = null
+      ctx.quitting = true
+      app.quit()
+    })
     if (launchUpdate) runLaunchUpdate(revealMainWindow)
+    setupSandboxNotice(ctx.main)
     setupTray()
     setupMiniPlayer()
     setupShortcuts()
