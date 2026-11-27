@@ -31,6 +31,9 @@ jobs:
       - run: npm ci
       # xvfb: a virtual display. libfuse2t64: AppImages need FUSE 2, which Ubuntu 24.04 doesn't install.
       - run: sudo apt-get update && sudo apt-get install -y xvfb libfuse2t64
+      # Desktop Ubuntu 24.04 blocks unprivileged user namespaces (which Chromium's sandbox uses) through
+      # AppArmor; GitHub's runners don't. Turn the restriction on so the smoke tests see what users get.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=1
       # Only this runner's architecture: each builds natively.
       - run: npm run dist:linux -- --${{ matrix.runner == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }} --publish never
       - name: Smoke test the AppImage
