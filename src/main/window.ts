@@ -86,7 +86,7 @@ export function createMainWindow(opts: { deferShow?: boolean } = {}): BrowserWin
     win.hide()
     if (!store.get('tray.trayHintShown')) {
       store.set('tray.trayHintShown', true)
-      showTrayHint('Still playing', `YouputDesk keeps playing in the tray. ${isLinux() ? 'Open' : 'Right-click'} the tray icon's menu to quit.`)
+      showTrayHint('Still playing', `YouputDesk keeps playing in the tray. ${isLinux() ? "Open the tray icon's menu" : 'Right-click the tray icon'} to quit.`)
     }
   })
 
