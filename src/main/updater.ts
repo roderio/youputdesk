@@ -8,7 +8,7 @@
 import { app, dialog } from 'electron'
 import updater from 'electron-updater'
 import { allows } from '../shared/settings'
-import { ctx } from './context'
+import { ctx, showMainWindow } from './context'
 import { showUpdateDownloading, showUpdateReady } from './notifications'
 import { closeSplash, openSplash, sendSplash } from './splash'
 import { store } from './store'
@@ -30,6 +30,30 @@ let notified = ''
 let downloadedVersion: string | null = null
 /** The user asked for this check, so tell them when the download is ready. */
 let manualCheck = false
+/**
+ * While an install is starting: how to bring the app back if it fails. The .deb asks for the admin
+ * password, and cancelling that makes the install fail after the app has already shown "Installing…".
+ */
+let undoInstall: (() => void) | null = null
+
+/** Shows "Installing…" and runs the installer; if that fails, undo() puts the app back. */
+function install(undo: () => void): void {
+  ctx.quitting = true
+  undoInstall = () => {
+    undoInstall = null
+    ctx.quitting = false
+    closeSplash()
+    undo()
+  }
+  setTimeout(() => {
+    try {
+      autoUpdater.quitAndInstall(true, true)
+    } catch (err) {
+      console.warn('[YouputDesk] Update install failed:', err instanceof Error ? err.message : err)
+      undoInstall?.()
+    }
+  }, INSTALL_DELAY_MS)
+}
 
 /** The launch window's reactions to updater events, while it's up. */
 let launch: {
@@ -77,12 +101,11 @@ function schedule(firstIn = FIRST_CHECK_MS): void {
 /** Closes the app and runs the installer, which reopens the new version. */
 export function restartToUpdate(): void {
   if (!downloadedVersion) return
-  ctx.quitting = true
   ctx.main?.hide()
   openSplash(() => {})
   sendSplash({ phase: 'installing', version: downloadedVersion })
   // Silent: the window above is the progress UI. Then start the new version.
-  setTimeout(() => autoUpdater.quitAndInstall(true, true), INSTALL_DELAY_MS)
+  install(showMainWindow)
 }
 
 async function promptRestart(version: string): Promise<void> {
@@ -143,8 +166,10 @@ export function runLaunchUpdate(onDone: () => void): void {
       launch = null
       showSplash()
       sendSplash({ phase: 'installing', version })
-      ctx.quitting = true
-      setTimeout(() => autoUpdater.quitAndInstall(true, true), INSTALL_DELAY_MS)
+      install(() => {
+        onDone()
+        schedule(CHECK_EVERY_MS)
+      })
     },
     failed: finish,
   }
@@ -235,7 +260,8 @@ export function setupUpdater(): void {
   autoUpdater.on('error', (err) => {
     console.warn('[YouputDesk] Update failed:', err?.message ?? err)
     manualCheck = false
-    launch?.failed()
+    if (undoInstall) undoInstall()
+    else launch?.failed()
   })
   store.onDidChange('privacy', () => schedule())
 }
