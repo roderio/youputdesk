@@ -1,5 +1,10 @@
-/** System tray icon: click to open the app, right-click for controls and the mini player. */
-import { app, Menu, Tray } from 'electron'
+/**
+ * System tray icon: click to open the app, right-click for controls and the mini player.
+ * Linux tray icons (AppIndicator / StatusNotifier) don't report clicks, so there the menu is attached to
+ * the icon and rebuilt when what it shows changes.
+ */
+import { app, Menu, Notification, Tray } from 'electron'
+import { isLinux } from '../shared/platform'
 import { assetImage, ctx, sendAction, showMainWindow } from './context'
 import { setMiniAnchor, toggleMiniPlayer } from './mini'
 import { player } from './player'
@@ -46,22 +51,42 @@ export function setupTray(): void {
   tray = new Tray(assetImage('tray.png'))
   tray.setToolTip('YouputDesk')
   tray.on('click', showMainWindow)
-  // Build the menu on demand so it always shows the current song and play state.
-  tray.on('right-click', () => {
-    if (!tray) return
-    // The menu's Mini player item pops the card up above the tray icon.
-    setMiniAnchor(tray.getBounds())
-    tray.popUpContextMenu(buildMenu())
-  })
+  if (isLinux()) {
+    // No bounds either, so the mini player opens at the cursor instead of above the icon.
+    tray.setContextMenu(buildMenu())
+  } else {
+    // Build the menu on demand so it always shows the current song and play state.
+    tray.on('right-click', () => {
+      if (!tray) return
+      // The menu's Mini player item pops the card up above the tray icon.
+      setMiniAnchor(tray.getBounds())
+      tray.popUpContextMenu(buildMenu())
+    })
+  }
 
   let lastTip = ''
+  let lastMenu = ''
   player.on('state', (s) => {
+    if (isLinux()) {
+      // Only what the menu shows; position ticks would rebuild it several times a second.
+      const key = `${s.playing}|${s.title}|${s.artist}|${s.liked}|${s.ad}|${s.videoId}`
+      if (key !== lastMenu) tray?.setContextMenu(buildMenu())
+      lastMenu = key
+    }
     const tip = s.title && !s.ad ? `${s.playing ? '▶' : '❚❚'} ${s.title} — ${s.artist}` : 'YouputDesk'
     // Windows caps tray tooltips at 127 characters.
     if (tip !== lastTip) tray?.setToolTip((lastTip = tip).slice(0, 127))
   })
 }
 
-export function showTrayBalloon(title: string, content: string): void {
-  tray?.displayBalloon({ title, content, iconType: 'info', noSound: true })
+/** A one-off hint about the tray. Balloons are Windows-only; Linux gets an ordinary notification. */
+export function showTrayHint(title: string, content: string): void {
+  if (!isLinux()) {
+    tray?.displayBalloon({ title, content, iconType: 'info', noSound: true })
+    return
+  }
+  if (!Notification.isSupported()) return
+  const n = new Notification({ title, body: content, icon: assetImage('icon.png'), silent: true })
+  n.on('click', showMainWindow)
+  n.show()
 }
