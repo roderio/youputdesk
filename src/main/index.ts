@@ -91,7 +91,13 @@ if (!app.requestSingleInstanceLock()) {
     // With updates on, check behind the updater window while YouTube Music loads hidden.
     const launchUpdate = updatesEnabled()
     ctx.main = createMainWindow({ deferShow: launchUpdate })
-    ctx.main.on('closed', () => (ctx.main = null))
+    // Without the main window there's nothing to play or show. Quit, or a hidden mini player would keep a
+    // windowless app alive that relaunching can't bring back (it holds the single-instance lock).
+    ctx.main.on('closed', () => {
+      ctx.main = null
+      ctx.quitting = true
+      app.quit()
+    })
     if (launchUpdate) runLaunchUpdate(revealMainWindow)
     setupTray()
     setupMiniPlayer()
