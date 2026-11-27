@@ -40,10 +40,13 @@ jobs:
         run: |
           chmod +x dist/*.AppImage
           xvfb-run -a node scripts/smoke-linux.mjs dist/*.AppImage
+      # The .deb installs an AppArmor profile, so it must keep Chromium's sandbox even with the restriction on.
       - name: Smoke test the .deb
         run: |
           sudo apt-get install -y ./dist/*.deb
           xvfb-run -a node scripts/smoke-linux.mjs /opt/YouputDesk/youputdesk
+        env:
+          SMOKE_REQUIRE_SANDBOX: '1'
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

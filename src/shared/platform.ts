@@ -24,3 +24,11 @@ export const notificationsHelp = (platform: string): string =>
   isLinux(platform)
     ? "Nothing appears? Check your desktop's notification settings, and Do not disturb"
     : 'Nothing appears? Check Windows Settings → System → Notifications, and Do not disturb'
+
+/**
+ * Whether to tell the user, once, that Chromium is running without its sandbox. On Linux that happens when
+ * the system blocks unprivileged user namespaces (Ubuntu 24.04+ by default): the AppImage launcher then
+ * adds --no-sandbox so the app can start at all. The .deb installs an AppArmor profile and keeps the sandbox.
+ */
+export const shouldWarnNoSandbox = (platform: string, noSandbox: boolean, alreadyWarned: boolean): boolean =>
+  isLinux(platform) && noSandbox && !alreadyWarned

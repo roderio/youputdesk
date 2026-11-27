@@ -2,9 +2,16 @@
 // overlay (the preload) is injected. Then it quits the app. Used by CI on the Linux packages; it also runs
 // against any build on any OS. Needs a display (CI wraps it in xvfb-run).
 //
+// On Linux it also reports whether Chromium's sandbox is on. With SMOKE_REQUIRE_SANDBOX=1 a missing sandbox
+// fails the test (the .deb must always keep it). When the sandbox is off, it checks that the app recorded its
+// one-time "running without the sandbox" notice.
+//
 // Run: node scripts/smoke-linux.mjs <executable> [extra args…]
 // e.g. node scripts/smoke-linux.mjs dist/YouputDesk-0.3.0-x86_64.AppImage
 import { spawn } from 'node:child_process'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 
 const PORT = 9333
 const [exe, ...extra] = process.argv.slice(2)
@@ -14,6 +21,10 @@ if (!exe) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const linux = process.platform === 'linux'
+// The isolated profile's folder (see src/main/profile.ts). Start clean, so one-time notices show again.
+const profileDir = linux ? join(homedir(), '.config', 'YouputDesk-smoke-ci') : null
+if (profileDir) rmSync(profileDir, { recursive: true, force: true })
 
 const app = spawn(exe, [`--remote-debugging-port=${PORT}`, ...extra], {
   // An isolated profile, so the test never touches a real sign-in.
@@ -73,7 +84,19 @@ console.log(`Loaded ${page.url}`)
 await waitFor('the YouputDesk overlay', 30_000, () => evaluate(page.webSocketDebuggerUrl, "!!document.querySelector('youputdesk-overlay')"))
 console.log('Overlay injected')
 
+// The AppImage launcher execs the app in place, so this pid is the browser process either way.
+const sandboxOff = linux && readFileSync(`/proc/${app.pid}/cmdline`, 'utf8').split('\0').includes('--no-sandbox')
+if (linux) console.log(`Sandbox: ${sandboxOff ? 'OFF (--no-sandbox)' : 'on'}`)
+if (sandboxOff && process.env.SMOKE_REQUIRE_SANDBOX === '1') fail('Chromium is running without its sandbox')
+
 app.kill('SIGTERM')
 await waitFor('the app to quit', 15_000, () => exited, { allowExit: true })
+
+if (sandboxOff) {
+  const config = join(profileDir, 'config.json')
+  const notices = existsSync(config) ? JSON.parse(readFileSync(config, 'utf8')).notices : undefined
+  if (!notices?.noSandbox) fail('running without the sandbox, but the app never showed its one-time notice')
+  console.log('No-sandbox notice shown')
+}
 console.log('Smoke test passed')
 process.exit(0)

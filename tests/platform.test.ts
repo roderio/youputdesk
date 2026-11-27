@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { defaultCloseToTray, firefoxPlatformToken, isLinux, notificationsHelp, superKeyName, windowIconName } from '../src/shared/platform'
+import { defaultCloseToTray, shouldWarnNoSandbox, firefoxPlatformToken, isLinux, notificationsHelp, superKeyName, windowIconName } from '../src/shared/platform'
 
 describe('isLinux', () => {
   it('is true only for linux', () => {
@@ -43,5 +43,14 @@ describe('notificationsHelp', () => {
   it('points at the right settings', () => {
     expect(notificationsHelp('win32')).toBe('Nothing appears? Check Windows Settings → System → Notifications, and Do not disturb')
     expect(notificationsHelp('linux')).toBe("Nothing appears? Check your desktop's notification settings, and Do not disturb")
+  })
+})
+
+describe('shouldWarnNoSandbox', () => {
+  it('warns once on Linux when Chromium runs without its sandbox', () => {
+    expect(shouldWarnNoSandbox('linux', true, false)).toBe(true)
+    expect(shouldWarnNoSandbox('linux', true, true)).toBe(false)
+    expect(shouldWarnNoSandbox('linux', false, false)).toBe(false)
+    expect(shouldWarnNoSandbox('win32', true, false)).toBe(false)
   })
 })

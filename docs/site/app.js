@@ -140,11 +140,15 @@ async function setupDownload() {
     const deb = find(arm ? /_arm64\.deb$/ : /_amd64\.deb$/)
     if (appImage) appImageLink.href = appImage.browser_download_url
     if (deb) debLink.href = deb.browser_download_url
-    if (linux && appImage) {
-      button.href = appImage.browser_download_url
+    // The .deb keeps Chromium's sandbox on Ubuntu 24.04+, where the AppImage can't; the Linux tab offers both.
+    const linuxDownload = deb ?? appImage
+    if (linux && linuxDownload) {
+      button.href = linuxDownload.browser_download_url
       button.textContent = 'Download for Linux'
-      const mb = Math.round(appImage.size / 1024 / 1024)
-      meta.textContent = `Version ${version}, ${mb} MB. For Linux (beta)${arm ? ' on ARM64' : ''}. Free and open source.`
+      const mb = Math.round(linuxDownload.size / 1024 / 1024)
+      const what = linuxDownload === deb ? '.deb for Ubuntu, Debian and Mint' : 'AppImage'
+      const others = linuxDownload === deb ? ' Other distros: see Install.' : ''
+      meta.textContent = `Version ${version}, ${mb} MB. ${what}${arm ? ' on ARM64' : ''}, beta.${others} Free and open source.`
     } else if (setup) {
       button.href = setupLink.href = setup.browser_download_url
       const mb = Math.round(setup.size / 1024 / 1024)

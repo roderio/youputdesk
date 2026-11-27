@@ -9,6 +9,7 @@ import { setupIpc } from './ipc'
 import { setupMiniPlayer } from './mini'
 import { setupNotifications } from './notifications'
 import { setupPalette } from './palette'
+import { setupSandboxNotice } from './sandbox'
 import { setupSecurity } from './security'
 import { setupShortcuts, teardownShortcuts } from './shortcuts'
 import { focusSplash, isSplashOpen, setupSplash } from './splash'
@@ -99,6 +100,7 @@ if (!app.requestSingleInstanceLock()) {
       app.quit()
     })
     if (launchUpdate) runLaunchUpdate(revealMainWindow)
+    setupSandboxNotice(ctx.main)
     setupTray()
     setupMiniPlayer()
     setupShortcuts()

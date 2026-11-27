@@ -68,23 +68,27 @@ removes all of YouputDesk's data.
 For x64 and ARM64 (`arm64`/`aarch64`) PCs. Download from the
 [latest release](https://github.com/roderio/youputdesk/releases/latest):
 
-**AppImage** (any distro): download `YouputDesk-<version>-<arch>.AppImage`, make it executable and run it:
+**.deb** (recommended on Ubuntu, Debian and Mint): download `youputdesk_<version>_amd64.deb` (or `_arm64.deb`)
+and install it:
+
+```sh
+sudo apt install ./youputdesk_*_amd64.deb
+```
+
+It updates itself, and asks for your password to install each update.
+
+**AppImage** (other distros): download `YouputDesk-<version>-<arch>.AppImage`, make it executable and run it:
 
 ```sh
 chmod +x YouputDesk-*.AppImage
 ./YouputDesk-*.AppImage
 ```
 
-It updates itself. AppImages need FUSE 2: on Ubuntu 24.04 that's `sudo apt install libfuse2t64`
-(`libfuse2` on older releases).
+It updates itself. AppImages need FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04).
 
-**.deb** (Ubuntu, Debian, Mint): download `youputdesk_<version>_amd64.deb` (or `_arm64.deb`) and install it:
-
-```sh
-sudo apt install ./youputdesk_*_amd64.deb
-```
-
-It updates itself too, and asks for your password to install each update.
+Why the .deb on Ubuntu: Ubuntu 24.04 and later block what Chromium's sandbox needs unless an app ships a
+security profile. The .deb installs one; an AppImage can't, so it starts without the sandbox there, and
+YouputDesk tells you so once. The sandbox is what keeps a malicious web page from reaching your files.
 
 Linux support is new and hasn't been tried on every desktop yet. If something doesn't work, please
 [open an issue](https://github.com/roderio/youputdesk/issues/new/choose). Known limits: GNOME only shows a
