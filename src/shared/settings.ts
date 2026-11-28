@@ -118,3 +118,13 @@ export function withDefaults<T>(defaults: T, stored: unknown): T {
   }
   return out as T
 }
+
+/**
+ * What the first-launch privacy screen saves. Its lyrics switch names both lrclib.net and Unison, so turning it on
+ * there also turns Unison on. Left off, Unison stays unasked, so turning lyrics on later asks about it.
+ */
+export function privacyChoices(onlineLyrics: boolean, updateChecks: boolean): Partial<Settings['privacy']> {
+  return onlineLyrics
+    ? { consented: true, onlineLyrics, unison: true, unisonAsked: true, updateChecks }
+    : { consented: true, onlineLyrics, updateChecks }
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { matchPreset, PRESETS } from '../src/shared/eq'
-import { allows, DEFAULT_SETTINGS, needsUnisonQuestion, withDefaults, type Settings } from '../src/shared/settings'
+import { allows, DEFAULT_SETTINGS, needsUnisonQuestion, privacyChoices, withDefaults, type Settings } from '../src/shared/settings'
 import { defaultCloseToTray } from '../src/shared/platform'
 
 describe('withDefaults', () => {
@@ -82,5 +82,14 @@ describe('Unison consent', () => {
     expect(needsUnisonQuestion(s({ consented: true, onlineLyrics: true, unisonAsked: true }))).toBe(false)
     expect(needsUnisonQuestion(s({ consented: true, onlineLyrics: false }))).toBe(false)
     expect(needsUnisonQuestion(s({ consented: false, onlineLyrics: true }))).toBe(false)
+  })
+})
+
+describe('privacyChoices', () => {
+  it('turns Unison on with online lyrics on the first-launch screen, which names both services', () => {
+    expect(privacyChoices(true, true)).toEqual({ consented: true, onlineLyrics: true, unison: true, unisonAsked: true, updateChecks: true })
+  })
+  it('leaves Unison unasked when lyrics stay off, so turning them on later asks', () => {
+    expect(privacyChoices(false, false)).toEqual({ consented: true, onlineLyrics: false, updateChecks: false })
   })
 })

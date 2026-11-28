@@ -33,7 +33,8 @@ export const STYLES = /* css */ `
   --line: rgba(255, 255, 255, 0.55); --muted: rgba(255, 255, 255, 0.92); --faint: rgba(255, 255, 255, 0.75);
 }
 :host(.hc) .switch, :host(.hc) .btn, :host(.hc) .chip, :host(.hc) .select, :host(.hc) .text { border: 2px solid rgba(255, 255, 255, 0.8); }
-:host(.hc) .switch .knob { top: 1px; left: 1px; }
+:host(.hc) .switch:disabled { opacity: 0.4; cursor: default; }
+.switch .knob { top: 1px; left: 1px; }
 :host(.hc) button:focus-visible, :host(.hc) input:focus-visible, :host(.hc) select:focus-visible, :host(.hc) textarea:focus-visible, :host(.hc) [tabindex]:focus-visible {
   outline: 3px solid #ffd400; outline-offset: 3px; box-shadow: 0 0 0 6px #000;
 }
@@ -181,7 +182,7 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 6px; border-radius: 6px; backgr
 .np-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-artist { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .font-controls { display: flex; }
-.lyrics-panel { height: 100%; padding-bottom: 12px; }
+.lyrics-panel { position: relative; height: 100%; padding-bottom: 12px; }
 .lyrics { position: relative; flex: 1; min-height: 240px; max-height: calc(100vh - 330px); overflow-y: auto; scrollbar-width: none; mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent); }
 .lyrics p { padding: 6px 4px; font-weight: 600; line-height: 1.35; }
 /* "Lift": a word (or, for line-timed lyrics, the whole line) turns white and lifts as it's sung, with an accent glow. */
@@ -198,6 +199,12 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 6px; border-radius: 6px; backgr
 .lyrics.synced p.now .w.cur { text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 80%, transparent); }
 /* Performance mode and Reduce motion: only colours change. */
 :host(.perf) .lyrics.synced p, :host(.perf) .lyrics.synced .w, :host(.rm) .lyrics.synced p, :host(.rm) .lyrics.synced .w { transform: none !important; text-shadow: none !important; filter: none !important; }
+/* The one-time question about Unison, over the lyrics. */
+.ask-wrap { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(8,8,11,0.6); backdrop-filter: blur(3px); animation: fade-in 200ms var(--ease); }
+.ask-card { max-width: 360px; padding: 18px; border-radius: var(--radius); background: var(--bg-solid); border: 1px solid var(--line); box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px; }
+.ask-card h3 { font-size: 15px; }
+.ask-card p { color: var(--muted); line-height: 1.45; }
+.ask-card .actions { display: flex; gap: 8px; margin-top: 6px; }
 .credit .link { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; font-size: inherit; }
 .credit .link:hover { color: var(--text); }
 .lyrics.plain p { color: rgba(255,255,255,0.85); font-weight: 500; padding: 2px 4px; }

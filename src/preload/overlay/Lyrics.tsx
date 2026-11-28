@@ -7,6 +7,7 @@ import { stripTimestamps } from '../../shared/lyrics-match'
 import { lineIndexAt, lrcToRich, wordIndexAt, type RichLine, type RichLyrics, type RichWord } from '../../shared/rich'
 import { SEL } from '../../shared/selectors'
 import { parseTtml, xmlParser } from '../../shared/ttml'
+import { needsUnisonQuestion } from '../../shared/settings'
 import { creditName } from '../../shared/unison'
 import { runAction } from '../actions'
 import { videoElement } from '../page'
@@ -247,10 +248,10 @@ function LyricsBody({ big }: { big?: boolean }) {
     return (
       <div class="lyrics-empty">
         <Icon name="lyrics" size={28} />
-        <p>Online lyrics are off. Turning them on sends the song title and artist to lrclib.net.</p>
+        <p>Online lyrics are off. Turning them on sends the song title and artist to lrclib.net, and its YouTube video ID to unison.betterlyrics.org.</p>
         <div class="actions">
           <Button onClick={() => {
-            updateSettings('privacy', { onlineLyrics: true })
+            updateSettings('privacy', { onlineLyrics: true, unison: true, unisonAsked: true })
             retry()
           }}>Turn on</Button>
           <Button onClick={openYtmLyrics}>YouTube Music lyrics</Button>
@@ -307,6 +308,38 @@ function LyricsBody({ big }: { big?: boolean }) {
   )
 }
 
+/**
+ * Asked once, over the lyrics: Unison is part of online lyrics the user agreed to before it existed. Lyrics keep
+ * loading from LRCLIB underneath until they answer.
+ */
+function UnisonQuestion() {
+  const ask = useUi((s) => needsUnisonQuestion(s.settings))
+  const card = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (ask) card.current?.querySelector<HTMLButtonElement>('button')?.focus()
+  }, [ask])
+  if (!ask) return null
+  return (
+    <div class="ask-wrap">
+      <div class="ask-card" role="dialog" aria-label="Word-by-word lyrics" ref={card}>
+        <h3>Word-by-word lyrics</h3>
+        <p>
+          Unison has lyrics timed word by word for many songs. To look them up, YouputDesk sends the song's YouTube
+          video ID to unison.betterlyrics.org. Nothing about you.
+        </p>
+        <div class="actions">
+          <Button primary onClick={() => updateSettings('privacy', { unison: true, unisonAsked: true })}>Turn on</Button>
+          <Button onClick={() => updateSettings('privacy', { unisonAsked: true })}>Not now</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Remounting the lyrics when Unison is switched on or off looks the song up again with the new setting. */
+const useLyricsKey = (videoId: string | undefined): string =>
+  `${videoId}|${useUi((s) => s.settings.privacy.unison && s.settings.privacy.onlineLyrics)}`
+
 function FontControls() {
   const scale = useUi((s) => s.settings.lyrics.fontScale)
   const set = (v: number) => updateSettings('lyrics', { fontScale: Math.round(Math.min(1.6, Math.max(0.8, v)) * 10) / 10 })
@@ -320,6 +353,7 @@ function FontControls() {
 
 export function LyricsPanel() {
   const player = useUi((s) => s.player)
+  const lyricsKey = useLyricsKey(player?.videoId)
   return (
     <div class="panel-body lyrics-panel">
       <div class="now-playing">
@@ -331,13 +365,15 @@ export function LyricsPanel() {
         <FontControls />
         <IconButton icon="fullscreen" label="Full-screen lyrics" onClick={() => setState({ fullLyrics: true, panel: null })} />
       </div>
-      <LyricsBody key={player?.videoId} />
+      <LyricsBody key={lyricsKey} />
+      <UnisonQuestion />
     </div>
   )
 }
 
 export function FullLyrics() {
   const player = useUi((s) => s.player)
+  const lyricsKey = useLyricsKey(player?.videoId)
   const perf = useUi((s) => s.settings.ui.performanceMode)
   return (
     <div class="full-lyrics" role="dialog" aria-label="Full-screen lyrics">
@@ -356,7 +392,8 @@ export function FullLyrics() {
         <IconButton icon="next" label="Next" onClick={() => runAction('next')} />
         <IconButton icon="close" label="Close (Esc)" onClick={() => setState({ fullLyrics: false })} />
       </div>
-      <LyricsBody big key={player?.videoId} />
+      <LyricsBody big key={lyricsKey} />
+      <UnisonQuestion />
     </div>
   )
 }
