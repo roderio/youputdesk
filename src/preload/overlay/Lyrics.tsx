@@ -1,28 +1,65 @@
 import { ipcRenderer } from 'electron'
+import { Fragment } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { IPC, type LyricsResult, type PlayerState } from '../../shared/ipc'
-import { lineAt, parseLrc, type LyricLine } from '../../shared/lrc'
+import { IPC, type LyricsQuery, type LyricsResult, type PlayerState, type UnisonLyrics } from '../../shared/ipc'
+import { parseLrc } from '../../shared/lrc'
+import { stripTimestamps } from '../../shared/lyrics-match'
+import { lineIndexAt, lrcToRich, wordIndexAt, type RichLine, type RichLyrics, type RichWord } from '../../shared/rich'
 import { SEL } from '../../shared/selectors'
+import { parseTtml, xmlParser } from '../../shared/ttml'
+import { creditName } from '../../shared/unison'
 import { runAction } from '../actions'
 import { videoElement } from '../page'
 import { setState, updateSettings, useUi } from '../store'
 import { Icon } from './icons'
 import { Button, IconButton } from './ui'
 
-type Status = 'idle' | 'loading' | 'synced' | 'plain' | 'instrumental' | 'none' | 'error'
+type Status = 'idle' | 'loading' | 'rich' | 'plain' | 'instrumental' | 'none' | 'error'
+type Credit = UnisonLyrics['credit'] | 'lrclib' | null
 
 interface Loaded {
   status: Status
-  lines: LyricLine[]
+  /** Synced lyrics, line- or word-timed. */
+  rich: RichLyrics | null
   plain: string
   /** Lyrics are from another version of the song, so they're shown unsynced. */
   otherVersion: boolean
+  credit: Credit
 }
 
-const EMPTY: Loaded = { status: 'idle', lines: [], plain: '', otherVersion: false }
+const EMPTY: Loaded = { status: 'idle', rich: null, plain: '', otherVersion: false, credit: null }
+
+let parser: DOMParser | null = null
+/** One parser (and one Trusted Types policy) per page. */
+const ttmlParser = (): DOMParser =>
+  (parser ??= xmlParser((window as unknown as { trustedTypes?: Parameters<typeof xmlParser>[0] }).trustedTypes))
+
+/** What to draw for a result, or null when Unison's TTML can't be read (then LRCLIB's lyrics are asked for). */
+function toLoaded(r: LyricsResult | null): Loaded | null {
+  if (!r) return { ...EMPTY, status: 'none' }
+  if (r.source === 'lrclib') {
+    const base = { ...EMPTY, credit: 'lrclib' as const, otherVersion: !!r.otherVersion }
+    if (r.instrumental) return { ...base, status: 'instrumental' }
+    const lines = r.synced ? parseLrc(r.synced) : []
+    if (lines.length) return { ...base, status: 'rich', rich: lrcToRich(lines), plain: r.plain ?? '' }
+    if (r.plain) return { ...base, status: 'plain', plain: r.plain }
+    return { ...EMPTY, status: 'none' }
+  }
+  const base = { ...EMPTY, credit: r.credit }
+  if (r.format === 'ttml') {
+    const rich = parseTtml(r.text, ttmlParser())
+    return rich ? { ...base, status: 'rich', rich } : null
+  }
+  if (r.format === 'lrc') {
+    const lines = parseLrc(r.text)
+    if (lines.length) return { ...base, status: 'rich', rich: lrcToRich(lines) }
+    return { ...base, status: 'plain', plain: stripTimestamps(r.text) }
+  }
+  return { ...base, status: 'plain', plain: r.text }
+}
 
 /**
- * Lyrics for the current song, fetched once per track (main caches them on disk). Waits until
+ * Lyrics for the current song, fetched once per track (main saves them on disk). Waits until
  * YTM reports the song's title, artist and length: looking up with half-loaded details finds
  * nothing, or worse, a different song with the same name.
  */
@@ -39,23 +76,15 @@ function useLyrics(player: PlayerState | null): Loaded & { retry: () => void } {
     }
     let cancelled = false
     setLoaded({ ...EMPTY, status: 'loading' })
-    const query = {
+    const query: LyricsQuery = {
       videoId: player.videoId, title: player.title, artist: player.artist, album: player.album, duration: player.duration,
       refresh: attempt > 0,
     }
-    ipcRenderer
-      .invoke(IPC.lyricsGet, query)
-      .then((res: LyricsResult | null) => {
-        if (cancelled) return
-        // Unison results are drawn from Task 7 on; until then only LRCLIB's are shown.
-        const r = res?.source === 'lrclib' ? res : null
-        const otherVersion = !!r?.otherVersion
-        if (!r) setLoaded({ ...EMPTY, status: 'none' })
-        else if (r.instrumental) setLoaded({ ...EMPTY, status: 'instrumental' })
-        else if (r.synced) setLoaded({ status: 'synced', lines: parseLrc(r.synced), plain: r.plain ?? '', otherVersion })
-        else if (r.plain) setLoaded({ status: 'plain', lines: [], plain: r.plain, otherVersion })
-        else setLoaded({ ...EMPTY, status: 'none' })
-      })
+    const get = (q: LyricsQuery): Promise<LyricsResult | null> => ipcRenderer.invoke(IPC.lyricsGet, q)
+    get(query)
+      // Unison lyrics we can't read: fall back to LRCLIB's for this song.
+      .then((r) => (cancelled ? null : toLoaded(r) ?? get({ ...query, exclude: 'unison' }).then((again) => toLoaded(again) ?? { ...EMPTY, status: 'none' as const })))
+      .then((l) => !cancelled && l && setLoaded(l))
       .catch(() => !cancelled && setLoaded({ ...EMPTY, status: 'error' }))
     return () => {
       cancelled = true
@@ -65,24 +94,53 @@ function useLyrics(player: PlayerState | null): Loaded & { retry: () => void } {
   return { ...loaded, retry: () => setAttempt((a) => a + 1) }
 }
 
-/** Index of the current line, following the <video> clock every frame (only while lyrics are on screen). */
-function useActiveLine(lines: LyricLine[]): number {
-  const [active, setActive] = useState(-1)
+interface Active {
+  line: number
+  /** Last word of the current line that has started, -1 before the first. */
+  word: number
+  /** The word being sung right now, or -1 between words. */
+  cur: number
+  bgWord: number
+  bgCur: number
+}
+const NONE: Active = { line: -1, word: -1, cur: -1, bgWord: -1, bgCur: -1 }
+
+/** Show each line a touch early so it's on screen as it's sung. */
+const LOOK_AHEAD_S = 0.25
+/** A word keeps its glow a moment after it ends. */
+const LINGER_S = 0.15
+
+function wordState(line: RichLine | undefined, t: number): [number, number] {
+  if (!line || line.words.length === 0) return [-1, -1]
+  const w = wordIndexAt(line, t)
+  return [w, w >= 0 && t < line.words[w].end + LINGER_S ? w : -1]
+}
+
+/** The current line and word, following the <video> clock every frame (only while lyrics are on screen). */
+function useActive(rich: RichLyrics | null): Active {
+  const [active, setActive] = useState<Active>(NONE)
   useEffect(() => {
-    if (lines.length === 0) return
+    setActive(NONE)
+    if (!rich || rich.lines.length === 0) return
     let frame = 0
-    let last = -2
+    let last = ''
     const tick = () => {
       frame = requestAnimationFrame(tick)
       const video = videoElement()
       if (!video || document.hidden) return
-      // Show each line a touch early so it's on screen as it's sung.
-      const i = lineAt(lines, video.currentTime + 0.25)
-      if (i !== last) setActive((last = i))
+      const t = video.currentTime + LOOK_AHEAD_S
+      const line = lineIndexAt(rich.lines, t)
+      const [word, cur] = wordState(rich.lines[line], t)
+      const [bgWord, bgCur] = wordState(rich.lines[line]?.background, t)
+      const key = `${line}|${word}|${cur}|${bgWord}|${bgCur}`
+      if (key !== last) {
+        last = key
+        setActive({ line, word, cur, bgWord, bgCur })
+      }
     }
     tick()
     return () => cancelAnimationFrame(frame)
-  }, [lines])
+  }, [rich])
   return active
 }
 
@@ -93,21 +151,87 @@ function openYtmLyrics(): void {
   setState({ panel: null, fullLyrics: false })
 }
 
+/** A line's words, with the syllables of one word kept together so a word never breaks across lines. */
+function Words({ words, sung, cur }: { words: RichWord[]; sung: number; cur: number }) {
+  const groups: [RichWord, number][][] = []
+  let group: [RichWord, number][] = []
+  words.forEach((w, j) => {
+    group.push([w, j])
+    if (!w.joinNext) {
+      groups.push(group)
+      group = []
+    }
+  })
+  if (group.length) groups.push(group)
+  return (
+    <>
+      {groups.map((g, gi) => (
+        <Fragment key={gi}>
+          {gi > 0 && ' '}
+          <span class="wg">
+            {g.map(([w, j]) => <span key={j} class={`w${j <= sung ? ' sung' : ''}${j === cur ? ' cur' : ''}`}>{w.text}</span>)}
+          </span>
+        </Fragment>
+      ))}
+    </>
+  )
+}
+
+function Line({ line, i, active, bg }: { line: RichLine; i: number; active: Active; bg?: boolean }) {
+  const now = i === active.line
+  const cls = [
+    line.words.length ? 'wt' : 'lt',
+    now ? 'now' : i < active.line ? 'past' : '',
+    Math.abs(i - Math.max(active.line, 0)) > 2 ? 'far' : '',
+    line.side === 'right' ? 'right' : '',
+    bg ? 'bg' : '',
+  ].filter(Boolean).join(' ')
+  return (
+    <p data-i={bg ? undefined : i} class={cls} onClick={() => runAction('seekTo', line.begin)} title="Jump here">
+      {line.words.length
+        ? <Words words={line.words} sung={now ? (bg ? active.bgWord : active.word) : -1} cur={now ? (bg ? active.bgCur : active.cur) : -1} />
+        : line.text || '♪'}
+    </p>
+  )
+}
+
+/** The credit Unison's licence asks for: Unison and the person who submitted the lyrics, both linked. */
+function CreditLine({ credit }: { credit: Credit }) {
+  if (!credit) return null
+  if (credit === 'lrclib') return <p class="credit">Lyrics from LRCLIB · click a line to jump to it</p>
+  const name = creditName(credit.submitterName)
+  const open = (kind: 'song' | 'curator', id: string) => ipcRenderer.send(IPC.openLyricsCredit, { kind, id })
+  return (
+    <p class="credit">
+      Lyrics from <button type="button" class="link" onClick={() => open('song', credit.videoId)}>Unison</button>
+      {name && (
+        <>
+          {' · submitted by '}
+          {credit.submitterKeyId
+            ? <button type="button" class="link" onClick={() => open('curator', credit.submitterKeyId)}>{name}</button>
+            : name}
+        </>
+      )}
+      {' · click a line to jump to it'}
+    </p>
+  )
+}
+
 function LyricsBody({ big }: { big?: boolean }) {
   const online = useUi((s) => s.settings.privacy.consented && s.settings.privacy.onlineLyrics)
   const player = useUi((s) => s.player)
   const scale = useUi((s) => s.settings.lyrics.fontScale)
-  const perf = useUi((s) => s.settings.ui.performanceMode)
-  const { status, lines, plain, otherVersion, retry } = useLyrics(player)
-  const active = useActiveLine(status === 'synced' ? lines : [])
+  const still = useUi((s) => s.settings.ui.performanceMode || s.settings.accessibility.reduceMotion)
+  const { status, rich, plain, otherVersion, credit, retry } = useLyrics(player)
+  const active = useActive(status === 'rich' ? rich : null)
   const scroller = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const box = scroller.current
-    const el = box?.querySelector<HTMLElement>(`[data-i="${active}"]`)
+    const el = box?.querySelector<HTMLElement>(`[data-i="${active.line}"]`)
     if (!box || !el) return
-    box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.offsetHeight / 2, behavior: perf ? 'auto' : 'smooth' })
-  }, [active])
+    box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.offsetHeight / 2, behavior: still ? 'auto' : 'smooth' })
+  }, [active.line])
 
   if (player?.ad) return <div class="lyrics-empty"><Icon name="info" size={28} /><p>Lyrics will appear after the ad.</p></div>
   if (!player) return <div class="lyrics-empty"><Icon name="note" size={28} /><p>Play a song to see its lyrics.</p></div>
@@ -134,7 +258,7 @@ function LyricsBody({ big }: { big?: boolean }) {
       </div>
     )
   }
-  if (status === 'none' || status === 'error') {
+  if (status === 'none' || status === 'error' || (status === 'rich' && !rich)) {
     return (
       <div class="lyrics-empty">
         <Icon name="lyrics" size={28} />
@@ -149,27 +273,37 @@ function LyricsBody({ big }: { big?: boolean }) {
 
   // px, not rem: YTM shrinks the root font size, which would make rem text tiny.
   const fontSize = `${Math.round((big ? 34 : 19) * scale)}px`
+  // Full screen has no footer, so the credit sits under the last line.
+  const footer = big ? null : <CreditLine credit={credit} />
   if (status === 'plain') {
     return (
-      <div class="lyrics plain" style={{ fontSize }} ref={scroller}>
-        <p class="lyrics-note">
-          {otherVersion ? 'Not time-synced: these lyrics match another version of this song' : 'Not time-synced'}
-        </p>
-        {plain.split('\n').map((l, i) => <p key={i}>{l || ' '}</p>)}
-      </div>
+      <>
+        <div class="lyrics plain" style={{ fontSize }} ref={scroller}>
+          <p class="lyrics-note">
+            {otherVersion ? 'Not time-synced: these lyrics match another version of this song' : 'Not time-synced'}
+          </p>
+          {plain.split('\n').map((l, i) => <p key={i}>{l || ' '}</p>)}
+          {big && <CreditLine credit={credit} />}
+        </div>
+        {footer}
+      </>
     )
   }
   return (
-    <div class={`lyrics synced ${big ? 'big' : ''}`} style={{ fontSize }} ref={scroller}>
-      <div class="lyrics-pad" />
-      {lines.map((l, i) => (
-        <p key={i} data-i={i} class={i === active ? 'now' : i < active ? 'past' : ''}
-          onClick={() => runAction('seekTo', l.time)} title="Jump here">
-          {l.text || '♪'}
-        </p>
-      ))}
-      <div class="lyrics-pad" />
-    </div>
+    <>
+      <div class={`lyrics synced ${big ? 'big' : ''}`} style={{ fontSize }} ref={scroller}>
+        <div class="lyrics-pad" />
+        {rich!.lines.map((l, i) => (
+          <Fragment key={i}>
+            <Line line={l} i={i} active={active} />
+            {l.background && <Line line={l.background} i={i} active={active} bg />}
+          </Fragment>
+        ))}
+        <div class="lyrics-pad" />
+        {big && <CreditLine credit={credit} />}
+      </div>
+      {footer}
+    </>
   )
 }
 
@@ -198,7 +332,6 @@ export function LyricsPanel() {
         <IconButton icon="fullscreen" label="Full-screen lyrics" onClick={() => setState({ fullLyrics: true, panel: null })} />
       </div>
       <LyricsBody key={player?.videoId} />
-      <p class="credit">Lyrics from LRCLIB · click a line to jump to it</p>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
-import { parseTtml, parseTtmlTime } from '../src/shared/ttml'
+import { describe, expect, it, vi } from 'vitest'
+import { parseTtml, parseTtmlTime, xmlParser } from '../src/shared/ttml'
 
 const parse = (s: string) => parseTtml(s, new DOMParser())
 const fixture = (name: string) => readFileSync(`tests/fixtures/${name}`, 'utf8')
@@ -65,4 +65,19 @@ describe('parseTtmlTime', () => {
     ['abc', null],
     ['', null],
   ])('%s → %s', (s, v) => expect(parseTtmlTime(s)).toBe(v))
+})
+
+describe('xmlParser', () => {
+  // YouTube Music requires Trusted Types, so DOMParser refuses plain strings there.
+  it('passes the text through a Trusted Types policy when the page has them', () => {
+    const createHTML = vi.fn((s: string) => s)
+    const createPolicy = vi.fn(() => ({ createHTML }))
+    const r = parseTtml(doc('<p begin="1" end="2">hello</p>'), xmlParser({ createPolicy }))
+    expect(r?.lines[0].text).toBe('hello')
+    expect(createPolicy).toHaveBeenCalledWith('youputdesk-lyrics', expect.anything())
+    expect(createHTML).toHaveBeenCalledTimes(1)
+  })
+  it('works without Trusted Types', () => {
+    expect(parseTtml(doc('<p begin="1" end="2">hi</p>'), xmlParser(undefined))?.lines[0].text).toBe('hi')
+  })
 })

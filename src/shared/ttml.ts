@@ -124,3 +124,27 @@ export function parseTtml(text: string, parser: DOMParser): RichLyrics | null {
   })
   return { lines: out, wordTimed: out.some((l) => l.words.length > 0) }
 }
+
+/** The bit of the Trusted Types API we use (window.trustedTypes). */
+interface TrustedTypesLike {
+  createPolicy(name: string, rules: { createHTML: (s: string) => string }): { createHTML(s: string): unknown }
+}
+
+/**
+ * A DOMParser that works on YouTube Music. Its CSP requires Trusted Types, which makes parseFromString refuse
+ * plain strings. The policy only feeds this parser, and an XML document never runs scripts, so passing the
+ * text through unchanged is safe. Create it once: policies are per page.
+ */
+export function xmlParser(tt: TrustedTypesLike | undefined): DOMParser {
+  let policy: ReturnType<TrustedTypesLike['createPolicy']> | undefined
+  try {
+    policy = tt?.createPolicy('youputdesk-lyrics', { createHTML: (s) => s })
+  } catch {
+    // A page that forbids new policies: parsing then fails, and the overlay falls back to LRCLIB.
+  }
+  const parser = new DOMParser()
+  return {
+    parseFromString: (text: string, type: DOMParserSupportedType) =>
+      parser.parseFromString((policy ? policy.createHTML(text) : text) as string, type),
+  }
+}
