@@ -1,4 +1,5 @@
 /** Choosing the right LRCLIB entry for what YouTube Music is playing. Pure, so it's unit-tested. */
+import { WORD_STAMP } from './lrc'
 
 export interface LrcLibTrack {
   trackName: string
@@ -40,7 +41,11 @@ export function cleanArtist(artist: string): string {
 
 /** LRC text without its timestamps, for showing synced lyrics unsynced. */
 export const stripTimestamps = (lrc: string): string =>
-  lrc.split(/\r?\n/).map((l) => l.replace(/\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]/g, '').trim()).join('\n').trim()
+  lrc
+    .split(/\r?\n/)
+    .map((l) => l.replace(/\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]/g, '').replace(WORD_STAMP, '').replace(/\s+/g, ' ').trim())
+    .join('\n')
+    .trim()
 
 export interface Pick {
   track: LrcLibTrack

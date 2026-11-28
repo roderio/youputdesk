@@ -1,13 +1,17 @@
 import { useState } from 'preact/hooks'
 import { ACTION_IDS, ACTIONS } from '../../shared/shortcuts'
+import { privacyChoices } from '../../shared/settings'
 import { getState, openPanel, setState, updateSettings, useUi, type Panel } from '../store'
 import { Icon, type IconName } from './icons'
 import { Button, IconButton, Keys, Row, Section, Switch } from './ui'
 
-/** The three features that send anything to a third party. Shared with the Privacy section in Settings. */
+/** The features that send anything to a third party. Shared with the Privacy section in Settings. */
 export const PRIVACY_TEXT = {
   discord: { title: "Show what I'm listening to on Discord", hint: 'The song, artist and cover appear on your Discord profile for your friends to see' },
   lyrics: { title: 'Online lyrics', hint: 'Looks up lyrics on lrclib.net, which receives the song title and artist (nothing about you)' },
+  /** The first-launch screen's one switch covers both lyrics services, so it names both. */
+  lyricsFirstRun: { title: 'Online lyrics', hint: "Looks up lyrics on lrclib.net and unison.betterlyrics.org. They receive the song's title, artist and YouTube video ID, nothing about you." },
+  unison: { title: 'Word-by-word lyrics (Unison)', hint: 'Looks up lyrics timed word by word on unison.betterlyrics.org, which receives the song’s YouTube video ID (nothing about you)' },
   updates: { title: 'Automatic updates', hint: 'Checks GitHub for new versions and installs them when you open the app. Recommended: updates carry security fixes' },
 }
 
@@ -22,7 +26,7 @@ export function Privacy() {
   const [updateChecks, setUpdates] = useState(s.privacy.updateChecks)
   const done = () => {
     updateSettings('discord', { enabled: discord })
-    updateSettings('privacy', { consented: true, onlineLyrics, updateChecks })
+    updateSettings('privacy', privacyChoices(onlineLyrics, updateChecks))
     if (!getState().settings.onboarding.done) setState({ welcome: true })
   }
   return (
@@ -42,8 +46,8 @@ export function Privacy() {
           <Row icon="chat" title={PRIVACY_TEXT.discord.title} hint={PRIVACY_TEXT.discord.hint}>
             <Switch checked={discord} label={PRIVACY_TEXT.discord.title} onChange={setDiscord} />
           </Row>
-          <Row icon="lyrics" title={PRIVACY_TEXT.lyrics.title} hint={PRIVACY_TEXT.lyrics.hint}>
-            <Switch checked={onlineLyrics} label={PRIVACY_TEXT.lyrics.title} onChange={setLyrics} />
+          <Row icon="lyrics" title={PRIVACY_TEXT.lyricsFirstRun.title} hint={PRIVACY_TEXT.lyricsFirstRun.hint}>
+            <Switch checked={onlineLyrics} label={PRIVACY_TEXT.lyricsFirstRun.title} onChange={setLyrics} />
           </Row>
           <Row icon="reset" title={PRIVACY_TEXT.updates.title} hint={PRIVACY_TEXT.updates.hint}>
             <Switch checked={updateChecks} label={PRIVACY_TEXT.updates.title} onChange={setUpdates} />
@@ -60,7 +64,7 @@ export function Privacy() {
 
 const FEATURES: { icon: IconName; title: string; text: string; panel?: Panel; action: keyof typeof ACTIONS }[] = [
   { icon: 'eq', title: 'Equalizer', text: '10 bands, presets, bass boost and a limiter so boosts never distort.', panel: 'eq', action: 'openEqualizer' },
-  { icon: 'lyrics', title: 'Synced lyrics', text: 'Lines light up as they’re sung. Click one to jump there.', panel: 'lyrics', action: 'openLyrics' },
+  { icon: 'lyrics', title: 'Synced lyrics', text: 'Lyrics light up as they’re sung. Click a line to jump there.', panel: 'lyrics', action: 'openLyrics' },
   { icon: 'palette', title: 'Themes', text: 'Recolour the app, or let the album art pick the colours.', panel: 'themes', action: 'openThemes' },
   { icon: 'keyboard', title: 'Shortcuts', text: 'Control music from any app with global hotkeys.', panel: 'shortcuts', action: 'openShortcuts' },
   { icon: 'bell', title: 'Ad alerts', text: 'Get told when an ad can be skipped, and skip it with one key.', action: 'skipAd' },

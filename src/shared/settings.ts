@@ -68,6 +68,10 @@ export type Settings = {
     onlineLyrics: boolean
     /** Check GitHub for new versions, download them in the background and install them at launch. */
     updateChecks: boolean
+    /** Also look up word-by-word lyrics on unison.betterlyrics.org (sends the YouTube video ID). Needs onlineLyrics. */
+    unison: boolean
+    /** The user has answered the question about Unison (or chose it on the privacy screen), so don't ask again. */
+    unisonAsked: boolean
   }
 }
 
@@ -87,14 +91,18 @@ export const DEFAULT_SETTINGS: Settings = {
   mini: { pinned: false },
   onboarding: { done: false },
   playback: { volume: null },
-  privacy: { consented: false, onlineLyrics: true, updateChecks: true },
+  privacy: { consented: false, onlineLyrics: true, updateChecks: true, unison: false, unisonAsked: false },
 }
 
 /** Settings the page overlay may change. Window, mini player and auth state stay main-process only. */
 export const PAGE_WRITABLE = ['eq', 'theme', 'ui', 'shortcuts', 'notifications', 'discord', 'tray', 'lyrics', 'accessibility', 'onboarding', 'playback', 'privacy'] as const
 
 /** True once the user has agreed to a feature that talks to a third party. */
-export const allows = (s: Settings, feature: 'onlineLyrics' | 'updateChecks'): boolean => s.privacy.consented && s.privacy[feature]
+export const allows = (s: Settings, feature: 'onlineLyrics' | 'updateChecks' | 'unison'): boolean =>
+  s.privacy.consented && s.privacy[feature] && (feature !== 'unison' || s.privacy.onlineLyrics)
+
+/** Unison is a part of online lyrics the user agreed to before it existed: ask about it once, while lyrics are on. */
+export const needsUnisonQuestion = (s: Settings): boolean => s.privacy.consented && s.privacy.onlineLyrics && !s.privacy.unisonAsked
 
 export const UI_SCALES = [0.8, 0.9, 1, 1.1, 1.25, 1.5] as const
 export type PageWritableKey = (typeof PAGE_WRITABLE)[number]
@@ -109,4 +117,14 @@ export function withDefaults<T>(defaults: T, stored: unknown): T {
     out[key] = withDefaults(value, (stored as Record<string, unknown> | undefined)?.[key])
   }
   return out as T
+}
+
+/**
+ * What the first-launch privacy screen saves. Its lyrics switch names both lrclib.net and Unison, so turning it on
+ * there also turns Unison on. Left off, Unison stays unasked, so turning lyrics on later asks about it.
+ */
+export function privacyChoices(onlineLyrics: boolean, updateChecks: boolean): Partial<Settings['privacy']> {
+  return onlineLyrics
+    ? { consented: true, onlineLyrics, unison: true, unisonAsked: true, updateChecks }
+    : { consented: true, onlineLyrics, updateChecks }
 }

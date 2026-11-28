@@ -1,0 +1,8 @@
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:itunes="http://music.apple.com/lyric-ttml-internal" itunes:timing="Line">
+  <body>
+    <div>
+      <p begin="0:01.000" end="0:03.000">First line   here</p>
+      <p begin="0:03.000" end="0:05.000">Second line</p>
+    </div>
+  </body>
+</tt>

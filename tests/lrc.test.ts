@@ -32,3 +32,9 @@ describe('lineAt', () => {
     expect(lineAt(lines, 999)).toBe(2)
   })
 })
+
+describe('enhanced LRC word stamps', () => {
+  it('parseLrc drops <mm:ss> word stamps from line text', () => {
+    expect(parseLrc('[00:01.00] <00:01.00> word <00:01.40> next')).toEqual([{ time: 1, text: 'word next' }])
+  })
+})

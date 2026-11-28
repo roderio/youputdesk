@@ -81,6 +81,14 @@ export function SettingsPanel() {
         <Row icon="lyrics" title={PRIVACY_TEXT.lyrics.title} hint={PRIVACY_TEXT.lyrics.hint}>
           <Switch checked={s.privacy.onlineLyrics} label={PRIVACY_TEXT.lyrics.title} onChange={(onlineLyrics) => updateSettings('privacy', { onlineLyrics })} />
         </Row>
+        <Row title={PRIVACY_TEXT.unison.title} hint={PRIVACY_TEXT.unison.hint}>
+          <Switch
+            checked={s.privacy.onlineLyrics && s.privacy.unison}
+            disabled={!s.privacy.onlineLyrics}
+            label={PRIVACY_TEXT.unison.title}
+            onChange={(unison) => updateSettings('privacy', { unison, unisonAsked: true })}
+          />
+        </Row>
         <Row icon="reset" title={PRIVACY_TEXT.updates.title} hint={PRIVACY_TEXT.updates.hint}>
           <Switch checked={s.privacy.updateChecks} label={PRIVACY_TEXT.updates.title} onChange={(updateChecks) => updateSettings('privacy', { updateChecks })} />
         </Row>

@@ -13,7 +13,9 @@ export async function deleteAllData(): Promise<void> {
     await s.clearCache().catch(() => {})
     await s.clearAuthCache().catch(() => {})
   }
-  await rm(join(app.getPath('userData'), 'lyrics-cache-v2'), { recursive: true, force: true }).catch(() => {})
+  for (const dir of ['lyrics-cache-v2', 'lyrics-cache-v3']) {
+    await rm(join(app.getPath('userData'), dir), { recursive: true, force: true }).catch(() => {})
+  }
   store.clear()
   ctx.quitting = true
   app.relaunch()

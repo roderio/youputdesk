@@ -119,6 +119,7 @@ h2, h3, p { margin: 0; }
 .value { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; min-width: 44px; text-align: right; }
 
 .switch { width: 40px; height: 24px; border-radius: 999px; background: rgba(255,255,255,0.18); position: relative; transition: background-color 180ms; flex: none; }
+.switch:disabled { opacity: 0.4; cursor: default; }
 .switch .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: transform 220ms var(--ease); }
 .switch.on { background: var(--accent); }
 .switch.on .knob { transform: translateX(16px); }
@@ -181,13 +182,32 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 6px; border-radius: 6px; backgr
 .np-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-artist { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .font-controls { display: flex; }
-.lyrics-panel { height: 100%; padding-bottom: 12px; }
+.lyrics-panel { position: relative; height: 100%; padding-bottom: 12px; }
 .lyrics { position: relative; flex: 1; min-height: 240px; max-height: calc(100vh - 330px); overflow-y: auto; scrollbar-width: none; mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent); }
 .lyrics p { padding: 6px 4px; font-weight: 600; line-height: 1.35; }
-.lyrics.synced p { color: rgba(255,255,255,0.32); cursor: pointer; border-radius: 10px; transform-origin: left center; transition: color 250ms, transform 300ms var(--ease), opacity 250ms; }
+/* "Lift": a word (or, for line-timed lyrics, the whole line) turns white and lifts as it's sung, with an accent glow. */
+.lyrics.synced p { color: rgba(255,255,255,0.32); cursor: pointer; border-radius: 10px; transform-origin: left center; transition: color 250ms, transform 260ms var(--ease), text-shadow 260ms, filter 300ms; }
 .lyrics.synced p:hover { color: rgba(255,255,255,0.6); }
-.lyrics.synced p.past { color: rgba(255,255,255,0.45); }
-.lyrics.synced p.now { color: #fff; transform: scale(1.04); text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 45%, transparent); }
+.lyrics.synced p.past { color: rgba(255,255,255,0.5); }
+.lyrics.synced p.far { filter: blur(1.2px); }
+.lyrics.synced p.right { text-align: right; transform-origin: right center; }
+.lyrics.synced p.bg { font-size: 0.75em; font-style: italic; padding-top: 0; }
+.lyrics.synced p.lt.now { color: #fff; transform: translateY(-2px) scale(1.03); text-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent); }
+.lyrics.synced .wg { display: inline-block; white-space: nowrap; }
+.lyrics.synced .w { display: inline-block; white-space: pre; transition: color 180ms, transform 260ms var(--ease), text-shadow 260ms; }
+.lyrics.synced p.now .w.sung { color: #fff; transform: translateY(-2px); }
+.lyrics.synced p.now .w.cur { text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 80%, transparent); }
+/* Performance mode and Reduce motion: only colours change. */
+:host(.perf) .lyrics.synced p, :host(.perf) .lyrics.synced .w, :host(.rm) .lyrics.synced p, :host(.rm) .lyrics.synced .w { transform: none !important; text-shadow: none !important; filter: none !important; }
+/* The one-time question about Unison, over the lyrics. */
+.ask-wrap { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(8,8,11,0.6); backdrop-filter: blur(3px); animation: fade-in 200ms var(--ease); }
+.ask-card { max-width: 360px; padding: 18px; border-radius: var(--radius); background: var(--bg-solid); border: 1px solid var(--line); box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px; }
+.ask-card h3 { font-size: 15px; }
+.ask-card p { color: var(--muted); line-height: 1.45; }
+.ask-card .actions { display: flex; gap: 8px; margin-top: 6px; }
+.lyrics p.credit, .lyrics.synced p.credit, .lyrics.synced p.credit:hover { color: var(--faint); font-size: 12px; font-weight: 500; cursor: default; transform: none; filter: none; text-shadow: none; margin-top: 24px; }
+.credit .link { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; font-size: inherit; }
+.credit .link:hover { color: var(--text); }
 .lyrics.plain p { color: rgba(255,255,255,0.85); font-weight: 500; padding: 2px 4px; }
 .lyrics-note { color: var(--faint) !important; font-size: 12px; font-weight: 500 !important; margin-bottom: 8px; }
 .lyrics-pad { height: 35%; }
