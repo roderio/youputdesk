@@ -274,7 +274,7 @@ function LyricsBody({ big }: { big?: boolean }) {
 
   // px, not rem: YTM shrinks the root font size, which would make rem text tiny.
   const fontSize = `${Math.round((big ? 34 : 19) * scale)}px`
-  // Full screen has no footer, so the credit sits under the last line.
+  // Full screen has no footer, so the credit sits right under the last line, clear of the faded bottom edge.
   const footer = big ? null : <CreditLine credit={credit} />
   if (status === 'plain') {
     return (
@@ -285,6 +285,7 @@ function LyricsBody({ big }: { big?: boolean }) {
           </p>
           {plain.split('\n').map((l, i) => <p key={i}>{l || ' '}</p>)}
           {big && <CreditLine credit={credit} />}
+          {big && <div class="lyrics-pad" />}
         </div>
         {footer}
       </>
@@ -300,8 +301,8 @@ function LyricsBody({ big }: { big?: boolean }) {
             {l.background && <Line line={l.background} i={i} active={active} bg />}
           </Fragment>
         ))}
-        <div class="lyrics-pad" />
         {big && <CreditLine credit={credit} />}
+        <div class="lyrics-pad" />
       </div>
       {footer}
     </>

@@ -33,8 +33,7 @@ export const STYLES = /* css */ `
   --line: rgba(255, 255, 255, 0.55); --muted: rgba(255, 255, 255, 0.92); --faint: rgba(255, 255, 255, 0.75);
 }
 :host(.hc) .switch, :host(.hc) .btn, :host(.hc) .chip, :host(.hc) .select, :host(.hc) .text { border: 2px solid rgba(255, 255, 255, 0.8); }
-:host(.hc) .switch:disabled { opacity: 0.4; cursor: default; }
-.switch .knob { top: 1px; left: 1px; }
+:host(.hc) .switch .knob { top: 1px; left: 1px; }
 :host(.hc) button:focus-visible, :host(.hc) input:focus-visible, :host(.hc) select:focus-visible, :host(.hc) textarea:focus-visible, :host(.hc) [tabindex]:focus-visible {
   outline: 3px solid #ffd400; outline-offset: 3px; box-shadow: 0 0 0 6px #000;
 }
@@ -120,6 +119,7 @@ h2, h3, p { margin: 0; }
 .value { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; min-width: 44px; text-align: right; }
 
 .switch { width: 40px; height: 24px; border-radius: 999px; background: rgba(255,255,255,0.18); position: relative; transition: background-color 180ms; flex: none; }
+.switch:disabled { opacity: 0.4; cursor: default; }
 .switch .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: transform 220ms var(--ease); }
 .switch.on { background: var(--accent); }
 .switch.on .knob { transform: translateX(16px); }
@@ -205,6 +205,7 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 6px; border-radius: 6px; backgr
 .ask-card h3 { font-size: 15px; }
 .ask-card p { color: var(--muted); line-height: 1.45; }
 .ask-card .actions { display: flex; gap: 8px; margin-top: 6px; }
+.lyrics p.credit, .lyrics.synced p.credit, .lyrics.synced p.credit:hover { color: var(--faint); font-size: 12px; font-weight: 500; cursor: default; transform: none; filter: none; text-shadow: none; margin-top: 24px; }
 .credit .link { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; font-size: inherit; }
 .credit .link:hover { color: var(--text); }
 .lyrics.plain p { color: rgba(255,255,255,0.85); font-weight: 500; padding: 2px 4px; }
