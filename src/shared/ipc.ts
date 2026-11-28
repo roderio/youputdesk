@@ -25,14 +25,25 @@ export interface AdState {
   skippable: boolean
 }
 
-export interface LyricsResult {
+export interface LrclibLyrics {
+  source: 'lrclib'
   synced: string | null
   plain: string | null
   instrumental: boolean
   /** Lyrics come from a different-length version (e.g. album track vs music video), so they're shown unsynced. */
   otherVersion?: boolean
-  source: 'lrclib'
 }
+
+/** Lyrics from Unison (unison.betterlyrics.org), looked up by video ID. Shown with a credit, as its licence requires. */
+export interface UnisonLyrics {
+  source: 'unison'
+  format: 'ttml' | 'lrc' | 'plain'
+  /** Raw lyrics in `format`. TTML is only parsed in the overlay. */
+  text: string
+  credit: { videoId: string; submitterName: string; submitterKeyId: string }
+}
+
+export type LyricsResult = LrclibLyrics | UnisonLyrics
 
 export interface LyricsQuery {
   videoId: string
@@ -42,6 +53,8 @@ export interface LyricsQuery {
   duration: number
   /** Skip the cache (user pressed "Try again"). */
   refresh?: boolean
+  /** Leave Unison out: the overlay couldn't read its lyrics, so it wants LRCLIB's. */
+  exclude?: 'unison'
 }
 
 export interface DiscordStatus {

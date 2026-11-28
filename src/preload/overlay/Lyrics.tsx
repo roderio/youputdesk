@@ -45,8 +45,10 @@ function useLyrics(player: PlayerState | null): Loaded & { retry: () => void } {
     }
     ipcRenderer
       .invoke(IPC.lyricsGet, query)
-      .then((r: LyricsResult | null) => {
+      .then((res: LyricsResult | null) => {
         if (cancelled) return
+        // Unison results are drawn from Task 7 on; until then only LRCLIB's are shown.
+        const r = res?.source === 'lrclib' ? res : null
         const otherVersion = !!r?.otherVersion
         if (!r) setLoaded({ ...EMPTY, status: 'none' })
         else if (r.instrumental) setLoaded({ ...EMPTY, status: 'instrumental' })

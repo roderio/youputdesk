@@ -2,7 +2,7 @@
 import { app, net } from 'electron'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { LyricsQuery, LyricsResult } from '../shared/ipc'
+import type { LrclibLyrics, LyricsQuery, LyricsResult } from '../shared/ipc'
 import { cleanArtist, cleanTitle, pickBest, stripTimestamps, type LrcLibTrack, type Pick } from '../shared/lyrics-match'
 import { allows } from '../shared/settings'
 import { store } from './store'
@@ -21,7 +21,7 @@ async function request(path: string, params: Record<string, string>): Promise<un
   return res.json()
 }
 
-function toResult({ track, inSync }: Pick): LyricsResult {
+function toResult({ track, inSync }: Pick): LrclibLyrics {
   const plain = track.plainLyrics || (track.syncedLyrics ? stripTimestamps(track.syncedLyrics) : null)
   return {
     // Timestamps from a different-length recording would highlight the wrong lines, so drop them.
