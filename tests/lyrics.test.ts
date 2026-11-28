@@ -186,3 +186,41 @@ describe('getLyrics with Unison', () => {
     expect(b).toMatchObject({ synced: '[00:01.00] Song B' })
   })
 })
+
+describe('background re-checks', () => {
+  const seedStale = (id: string) => {
+    mkdirSync(join(h.dir, 'lyrics-cache-v3'), { recursive: true })
+    writeFileSync(join(h.dir, 'lyrics-cache-v3', `${id}.json`), JSON.stringify({
+      unison: { checkedAt: Date.now() - 8 * DAY, etag: 'W/"old"', result: { source: 'unison', format: 'ttml', text: WORD_TTML, credit: { videoId: id, submitterName: 'x', submitterKeyId: KEY } } },
+    }))
+  }
+
+  it('stop asking Unison once the user turns it off', async () => {
+    seedStale('aaaaaaaaaaa')
+    seedStale('bbbbbbbbbbb')
+    let release!: () => void
+    const held = new Promise<void>((r) => (release = r))
+    serve({ unison: () => new Response(null, { status: 304 }) })
+    const route = h.route
+    h.route = async (url, init) => {
+      if (url.hostname === 'unison.betterlyrics.org' && unisonCalls().length === 1) await held
+      return route(url, init)
+    }
+    await lyrics.getLyrics(q({ videoId: 'aaaaaaaaaaa' }))
+    await lyrics.getLyrics(q({ videoId: 'bbbbbbbbbbb' }))
+    h.settings.privacy.unison = false
+    release()
+    await lyrics.settledForTests()
+    expect(unisonCalls().map((c) => c.url.searchParams.get('v'))).toEqual(['aaaaaaaaaaa'])
+  })
+
+  it('asks once per stale song, however often it is opened', async () => {
+    seedStale(ID)
+    serve({ unison: () => new Response(null, { status: 304 }) })
+    await lyrics.getLyrics(q())
+    await lyrics.getLyrics(q())
+    await lyrics.getLyrics(q())
+    await lyrics.settledForTests()
+    expect(unisonCalls()).toHaveLength(1)
+  })
+})

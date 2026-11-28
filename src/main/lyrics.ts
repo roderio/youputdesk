@@ -159,7 +159,10 @@ async function askUnison(videoId: string, slot: CacheEntry['unison']): Promise<C
 /** The weekly re-check, after the saved lyrics were already shown. Errors are ignored: the next open retries. */
 function recheckUnison(videoId: string): void {
   background = background.then(async () => {
+    // Re-checks queue up, so by now the user may have switched Unison off, or an earlier one refreshed this song.
+    if (!allows(store.store, 'unison')) return
     const entry = await loadEntry(videoId)
+    if (Date.now() - (entry.unison?.checkedAt ?? 0) <= UNISON_RECHECK_MS) return
     const slot = await askUnison(videoId, entry.unison)
     if (slot) await saveEntry(videoId, { ...(memory.get(videoId) ?? entry), unison: slot })
   }).catch(() => {})
@@ -173,17 +176,15 @@ export async function getLyrics(q: LyricsQuery): Promise<LyricsResult | null> {
   if (!q?.videoId || !/^[\w-]{6,20}$/.test(q.videoId) || !q.title || !cleanArtist(q.artist ?? '') || !(q.duration > 0)) return null
   const id = q.videoId
   const entry = { ...(await loadEntry(id)) }
-  let changed = false
+  /** The slots this call fetched. Only these are saved, so a re-check that finished meanwhile isn't undone. */
+  const changed: CacheEntry = {}
   // Song details only leave the PC once the user has allowed online lyrics (and, for Unison, word-by-word lyrics).
   const useUnison = allows(store.store, 'unison') && q.exclude !== 'unison'
   const hadUnison = !!entry.unison
 
   if (useUnison && (!entry.unison || q.refresh)) {
     const slot = await askUnison(id, entry.unison)
-    if (slot) {
-      entry.unison = slot
-      changed = true
-    }
+    if (slot) entry.unison = changed.unison = slot
   }
   const unison = useUnison ? entry.unison?.result : undefined
 
@@ -194,9 +195,8 @@ export async function getLyrics(q: LyricsQuery): Promise<LyricsResult | null> {
       try {
         const found = await fetchLyrics(q)
         if (found) {
-          entry.lrclib = found
+          entry.lrclib = changed.lrclib = found
           lrclibMisses.delete(id)
-          changed = true
         } else {
           lrclibMisses.add(id)
         }
@@ -207,8 +207,7 @@ export async function getLyrics(q: LyricsQuery): Promise<LyricsResult | null> {
     }
   }
 
-  if (changed) await saveEntry(id, entry)
-  else memory.set(id, entry)
+  if (changed.lrclib || changed.unison) await saveEntry(id, { ...memory.get(id), ...changed })
   if (useUnison && hadUnison && !q.refresh && Date.now() - (entry.unison?.checkedAt ?? 0) > UNISON_RECHECK_MS) recheckUnison(id)
   return rankLyrics({ lrclib: entry.lrclib, unison })
 }
