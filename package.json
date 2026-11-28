@@ -1,7 +1,7 @@
 {
   "name": "youputdesk",
   "productName": "YouputDesk",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "YouTube Music desktop app with an equalizer, synced lyrics, themes, a mini player and global hotkeys",
   "type": "module",
   "main": "out/main/index.js",
