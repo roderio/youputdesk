@@ -93,6 +93,8 @@ export const IPC = {
   /** page → main: actions only main can perform (window, mini player). */
   appAction: 'app:action',
   lyricsGet: 'lyrics:get',
+  /** page → main: open a Unison credit link, { kind: 'song' | 'curator', id }. Main builds the URL. */
+  openLyricsCredit: 'lyrics:credit',
   palette: 'theme:palette',
   shortcutStatus: 'shortcuts:status',
   discordStatus: 'discord:status',

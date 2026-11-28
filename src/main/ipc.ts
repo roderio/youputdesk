@@ -6,6 +6,7 @@ import { deleteAllData } from './data'
 import { openExternal } from './external'
 import { discordStatus } from './discord'
 import { getLyrics } from './lyrics'
+import { creditUrl } from '../shared/unison'
 import { resetMiniPosition, toggleMiniPlayer } from './mini'
 import { showTestNotification } from './notifications'
 import { currentPalette } from './palette'
@@ -64,6 +65,11 @@ export function setupIpc(): void {
 
   ipcMain.on(IPC.appAction, (e, id: unknown) => {
     if (fromMain(e) && typeof id === 'string' && id in APP_ACTIONS) APP_ACTIONS[id as keyof typeof APP_ACTIONS]()
+  })
+
+  ipcMain.on(IPC.openLyricsCredit, (e, link: { kind?: unknown; id?: unknown } | null) => {
+    const url = fromMain(e) ? creditUrl(link?.kind, link?.id) : null
+    if (url) openExternal(url)
   })
 
   ipcMain.handle(IPC.lyricsGet, (e, q: LyricsQuery) => (fromMain(e) ? getLyrics(q) : null))
