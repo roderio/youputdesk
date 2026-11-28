@@ -1,0 +1,14 @@
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:ttp="http://www.w3.org/ns/ttml#parameter" xmlns:itunes="http://music.apple.com/lyric-ttml-internal" ttp:timeBase="media" xml:lang="en" itunes:timing="Word">
+  <head>
+    <metadata>
+      <ttm:agent xml:id="v1" type="person"><ttm:name>First Singer</ttm:name></ttm:agent>
+      <ttm:agent xml:id="v2" type="person"><ttm:name>Second Singer</ttm:name></ttm:agent>
+    </metadata>
+  </head>
+  <body dur="0:10.000">
+    <div>
+      <p begin="0:03.000" end="0:05.000" ttm:agent="v2"><span begin="0:03.000" end="0:03.500">Moving</span> <span begin="0:03.500" end="0:04.000">on</span><span ttm:role="x-bg"><span begin="0:04.000" end="0:04.300">and</span> <span begin="0:04.300" end="0:05.000">on</span></span></p>
+      <p begin="0:01.000" end="0:02.000" ttm:agent="v1"><span begin="0:01.000" end="0:01.200">No</span><span begin="0:01.200" end="0:01.500">thing</span> <span begin="0:01.500" end="0:02.000">here</span></p>
+    </div>
+  </body>
+</tt>

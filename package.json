@@ -25,6 +25,7 @@
     "electron": "^45.4.1",
     "electron-builder": "^26.18.0",
     "electron-vite": "^6.0.0",
+    "jsdom": "^31.0.1",
     "typescript": "^7.0.2",
     "vite": "^8.4.0",
     "vitest": "^5.1.2"
