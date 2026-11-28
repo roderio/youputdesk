@@ -64,7 +64,7 @@ export function Privacy() {
 
 const FEATURES: { icon: IconName; title: string; text: string; panel?: Panel; action: keyof typeof ACTIONS }[] = [
   { icon: 'eq', title: 'Equalizer', text: '10 bands, presets, bass boost and a limiter so boosts never distort.', panel: 'eq', action: 'openEqualizer' },
-  { icon: 'lyrics', title: 'Synced lyrics', text: 'Lines light up as they’re sung. Click one to jump there.', panel: 'lyrics', action: 'openLyrics' },
+  { icon: 'lyrics', title: 'Synced lyrics', text: 'Lyrics light up as they’re sung. Click a line to jump there.', panel: 'lyrics', action: 'openLyrics' },
   { icon: 'palette', title: 'Themes', text: 'Recolour the app, or let the album art pick the colours.', panel: 'themes', action: 'openThemes' },
   { icon: 'keyboard', title: 'Shortcuts', text: 'Control music from any app with global hotkeys.', panel: 'shortcuts', action: 'openShortcuts' },
   { icon: 'bell', title: 'Ad alerts', text: 'Get told when an ad can be skipped, and skip it with one key.', action: 'skipAd' },

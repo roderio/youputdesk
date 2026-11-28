@@ -21,7 +21,7 @@ YouputDesk runs the real music.youtube.com, so Google sign-in, your library and 
 It then adds what the browser tab can't do:
 
 - **Equalizer**: 10 bands, presets, bass boost, loudness normalization and a limiter so boosts never distort
-- **Synced lyrics**: line by line from [LRCLIB](https://lrclib.net), click a line to jump there, full-screen mode
+- **Synced lyrics**: word by word where [Unison](https://unison.betterlyrics.org) has them, line by line from [LRCLIB](https://lrclib.net) otherwise. Click a line to jump there, full-screen mode
 - **Tray and mini player**: keeps playing when closed; a small always-on-top player you can drag anywhere
 - **Windows integration**: taskbar play/pause buttons and progress, media keys and the Windows media overlay
 
