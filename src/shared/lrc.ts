@@ -7,6 +7,8 @@ export interface LyricLine {
 }
 
 const STAMP = /\[(\d{1,3}):(\d{1,2}(?:[.:]\d{1,3})?)\]/g
+/** Enhanced LRC times each word inline ("<00:01.40> word"). Only line timing is used from LRC, so drop them. */
+export const WORD_STAMP = /<\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?>/g
 
 export function parseLrc(lrc: string): LyricLine[] {
   let offset = 0
@@ -20,7 +22,7 @@ export function parseLrc(lrc: string): LyricLine[] {
     }
     const stamps = [...raw.matchAll(STAMP)]
     if (stamps.length === 0) continue
-    const text = raw.replace(STAMP, '').trim()
+    const text = raw.replace(STAMP, '').replace(WORD_STAMP, '').replace(/\s+/g, ' ').trim()
     for (const [, min, sec] of stamps) {
       lines.push({ time: Number(min) * 60 + Number(sec.replace(':', '.')), text })
     }

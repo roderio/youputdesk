@@ -60,3 +60,9 @@ describe('stripTimestamps', () => {
     expect(stripTimestamps('[00:01.00] one\n[00:02.50][00:09.00] two')).toBe('one\ntwo')
   })
 })
+
+describe('stripTimestamps with word stamps', () => {
+  it('drops <mm:ss> word stamps too', () => {
+    expect(stripTimestamps('[00:01.00] <00:01.00> word <00:01.40> next')).toBe('word next')
+  })
+})
